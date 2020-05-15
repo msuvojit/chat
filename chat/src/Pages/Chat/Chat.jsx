@@ -16,11 +16,11 @@ import axios from "axios";
 import MessageIcon from "@material-ui/icons/Message";
 import AttachIcon from "@material-ui/icons/AttachFile";
 import CameraIcon from "@material-ui/icons/CameraAlt";
-import MenuIcon from "@material-ui/icons/Menu";
 import CloseIcon from "@material-ui/icons/Close";
-import DownloadIcon from "@material-ui/icons/CloudDownload";
 import BackIcon from "@material-ui/icons/ArrowBack";
 import SmileIcon from "@material-ui/icons/Mood";
+import DownloadIcon from "@material-ui/icons/CloudDownload";
+
 import firebase from "firebase";
 import Moment from "react-moment";
 import moment from "moment";
