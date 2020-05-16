@@ -1,13 +1,14 @@
 import Firebase from "firebase";
 var firebaseConfig = {
-  apiKey: "AIzaSyBJHZTJs7JgRbXXazigiskcVW20ksb75qI",
-  authDomain: "opdlift.firebaseapp.com",
-  databaseURL: "https://opdlift.firebaseio.com",
-  projectId: "opdlift",
-  storageBucket: "opdlift.appspot.com",
-  messagingSenderId: "860602596617",
-  appId: "1:860602596617:web:1eaf710ed5bcc57d9067d8",
-  measurementId: "G-691DZXRHRN"
+  apiKey: "AIzaSyCVBOk70HwuqqIor4h8qCPDNkoQS_iZSOw",
+    authDomain: "newopdlift.firebaseapp.com",
+    databaseURL: "https://newopdlift.firebaseio.com",
+    projectId: "newopdlift",
+    storageBucket: "newopdlift.appspot.com",
+    messagingSenderId: "287274948468",
+    appId: "1:287274948468:web:dbfbe2d4a8aba2d63fbe21",
+    measurementId: "G-3P9KH84QHQ"
+
 };
 // Initialize Firebase
 var firebase = Firebase.initializeApp(firebaseConfig);

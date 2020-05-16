@@ -204,7 +204,6 @@ const Message = ({
 }) => {
   const isLeft = left || !right;
   const classes = useMessageStyles({ left: isLeft });
-
   return (
     <React.Fragment>
       {!date ? null : (
@@ -215,17 +214,19 @@ const Message = ({
         </div>
       )}
       <div style={styles.root}>
-        {/* {avatar} */}
-        <ChatBubble
-          left={left}
-          right={right}
-          name={name}
-          time={time}
-          color={color}
-          textColor={textColor}
-        >
-          {children}
-        </ChatBubble>
+        <span>
+          {/* {avatar} */}
+          <ChatBubble
+            left={left}
+            right={right}
+            name={name}
+            time={time}
+            color={color}
+            textColor={textColor}
+          >
+            {children}
+          </ChatBubble>
+        </span>
       </div>
     </React.Fragment>
   );
@@ -322,6 +323,7 @@ const styles = {
     },
   },
 };
+var LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif?a";
 
 export default class Chat extends React.Component {
   constructor(props) {
@@ -374,10 +376,11 @@ export default class Chat extends React.Component {
         } else {
           var message = change.doc.data();
           message.timestamp && data.push(message);
-          console.log(message.timestamp && message.timestamp.toDate());
+          // console.log(message.timestamp && message.timestamp.toDate());
         }
       });
 
+      console.log(data.length);
       this.setState({ messages: data }, () => this.scrollToBottom());
     });
   };
@@ -405,8 +408,49 @@ export default class Chat extends React.Component {
     }
   };
 
+  saveImageMessage(file) {
+    // 1 - We add a message with a loading icon that will get updated with the shared image.
+    console.log(file);
+    firebase
+      .firestore()
+      .collection("messages")
+      .add({
+        room: this.state.channel,
+        sentBy: this.state.uid,
+        file: LOADING_IMAGE_URL,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      })
+      .then((messageRef) => {
+        // 2 - Upload the image to Cloud Storage.
+        var filePath = "files/" + this.state.uid + "/" + file.name;
+
+        return firebase
+          .storage()
+          .ref(filePath)
+          .put(file)
+          .then((fileSnapshot) => {
+            // 3 - Generate a public URL for the file.
+            return fileSnapshot.ref.getDownloadURL().then((url) => {
+              // 4 - Update the chat message placeholder with the image's URL.
+              return messageRef
+                .update({
+                  file: url,
+                })
+                .then(this.loadMessages());
+            });
+          });
+      })
+      .catch(function (error) {
+        console.error(
+          "There was an error uploading a file to Cloud Storage:",
+          error
+        );
+      });
+  }
+
   saveMessage = (messageText) => {
     this.setState({ message: "" });
+    console.log("saveMessage")
     firebase
       .firestore()
       .collection("messages")
@@ -554,12 +598,24 @@ export default class Chat extends React.Component {
                 }
               />
             </FormControl>
-            <Button style={styles.altButton} color="primary" variant="outlined">
+            <Button
+              style={styles.altButton}
+              color="primary"
+              variant="outlined"
+              onClick={() => document.getElementById("file-upload").click()}
+            >
               <AttachIcon />
             </Button>
-            <Button style={styles.altButton} color="primary" variant="outlined">
+            <input
+              id="file-upload"
+              type="file"
+              multiple="false"
+              style={{ display: "none" }}
+              onChange={(e) => this.saveImageMessage(e.target.files[0])}
+            />
+            {/* <Button style={styles.altButton} color="primary" variant="outlined">
               <CameraIcon />
-            </Button>
+            </Button> */}
             <Button
               style={styles.sendButton}
               color="primary"
