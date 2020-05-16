@@ -254,7 +254,7 @@ const styles = {
   },
   messages: {
     minHeight: "60vh",
-    maxHeight: "70vh",
+    maxHeight: "64vh",
     overflowY: "scroll",
   },
   outerCard: {
