@@ -21,11 +21,12 @@ import BackIcon from "@material-ui/icons/ArrowBack";
 import SmileIcon from "@material-ui/icons/Mood";
 import DownloadIcon from "@material-ui/icons/CloudDownload";
 
+import green from "@material-ui/core/colors/green";
+import sec from "@material-ui/core/colors/blueGrey";
 import firebase from "firebase";
 import Moment from "react-moment";
 import moment from "moment";
 import EmojiPicker from "emoji-picker-react";
-import { useRef } from "react";
 
 const useAvatarStyles = makeStyles((theme) => ({
   root: {
@@ -50,7 +51,7 @@ const Avatar = ({ avatar, size }) => {
   if (avatar.type === "text")
     return (
       <div
-        className={classes.root}
+        style={styles.root}
         style={{ backgroundColor: avatar.color, color: avatar.textColor }}
       >
         {avatar.text}
@@ -58,7 +59,7 @@ const Avatar = ({ avatar, size }) => {
     );
   return (
     <div
-      className={classes.root}
+      style={styles.root}
       style={{ backgroundImage: `url(${avatar.img ? avatar.img : avatar})` }}
     />
   );
@@ -96,9 +97,9 @@ const FileDisplay = ({ file, textColor }) => {
 
   const classes = useFileDisplayStyles({ textColor: textColor });
   return (
-    <Button variant="outlined" className={classes.root}>
-      <span className={classes.name}>{file.name}</span>
-      <DownloadIcon className={classes.icon} />
+    <Button variant="outlined" style={styles.root}>
+      <span style={styles.name}>{file.name}</span>
+      <DownloadIcon style={styles.icon} />
     </Button>
   );
 };
@@ -207,13 +208,13 @@ const Message = ({
   return (
     <React.Fragment>
       {!date ? null : (
-        <div className={classes.dateContainer}>
-          <div className={classes.dateBox}>
+        <div style={styles.dateContainer}>
+          <div style={styles.dateBox}>
             <Moment format="hh:mm">{moment(date, "hh:mm a")}</Moment>
           </div>
         </div>
       )}
-      <div className={classes.root}>
+      <div style={styles.root}>
         {/* {avatar} */}
         <ChatBubble
           left={left}
@@ -243,14 +244,18 @@ const avatar_andy = (
   />
 );
 
-const useStyles = makeStyles((theme) => ({
+const styles = {
   root: {
-    backgroundColor: theme.palette.primary[50],
-    height: "100vh",
-    width: "100vw",
+    backgroundColor: green,
+    width: "98vw",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+  },
+  messages: {
+    minHeight: "60vh",
+    maxHeight: "70vh",
+    overflowY: "scroll",
   },
   outerCard: {
     paddingLeft: 0,
@@ -316,36 +321,48 @@ const useStyles = makeStyles((theme) => ({
       right: 0,
     },
   },
-}));
+};
 
-export default function Chat(props) {
-  const classes = useStyles();
-  const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
-  const addToMessage = (emoji) => setMessage((message) => message + emoji);
-  const [showEmoji, setShowEmoji] = useState(false);
-  const emojiRef = useRef();
-  const closeEmojiBox = (e) => {
-    if (!showEmoji) return;
-    if (!emojiRef || !emojiRef.current || !emojiRef.current.contains(e.target))
-      setShowEmoji(false);
-  };
-  const [uid, setUid] = useState("");
-  const [channel, setChannel] = useState("");
-  const [token, setToken] = useState("");
+export default class Chat extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      message: "",
+      messages: [],
+      showEmoji: false,
+      uid: "",
+      channel: "",
+      token: "",
+    };
+  }
+  // const [messages, setMessages] = useState([]);
+  // const [message, setMessage] = useState("");
+  // const addToMessage = (emoji) => setMessage((message) => message + emoji);
+  // const [showEmoji, setShowEmoji] = useState(false);
+  // const emojiRef = useRef();
+  // const closeEmojiBox = (e) => {
+  //   if (!showEmoji) return;
+  //   if (!emojiRef || !emojiRef.current || !emojiRef.current.contains(e.target))
+  //     setShowEmoji(false);
+  // };
+  // const [uid, setUid] = useState("");
+  // const [channel, setChannel] = useState("");
+  // const [token, setToken] = useState("");
 
-  const scrollToBottom = () => {
+  scrollToBottom = () => {
     var objDiv = document.getElementById("chatList");
-    if (objDiv) objDiv.scrollTop = objDiv.scrollHeight;
+    // if (objDiv)
+    console.log({ objDiv });
+    objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;
   };
 
-  const loadMessages = () => {
+  loadMessages = () => {
     // Create the query to load the last 12 messages and listen for new ones.
-    console.log("loadMessages", channel);
+    console.log("loadMessages", this.state.channel);
     var query = firebase
       .firestore()
       .collection("messages")
-      .where("room", "==", channel)
+      .where("room", "==", this.state.channel)
       .orderBy("timestamp", "asc")
       .limit(40);
     var data = [];
@@ -360,38 +377,42 @@ export default function Chat(props) {
           console.log(message.timestamp && message.timestamp.toDate());
         }
       });
-      setMessages(data, () => {
-        console.log(messages);
-        scrollToBottom();
-      });
+
+      this.setState({ messages: data }, () => this.scrollToBottom());
     });
   };
 
-  const getDetails = async () => {
+  getDetails = async () => {
     try {
-      var token = props.match.params.token;
+      var token = this.props.match.params.token;
       console.log({ token });
       var result = await axios.post(
         "https://notification.opdlift.com/api/agora/meeting-details",
         { token }
       );
-      setUid(result.data.uid);
-      setChannel(result.data.channel);
-      setToken(result.data.token);
+
+      this.setState(
+        {
+          uid: result.data.uid,
+          channel: result.data.channel,
+          token: result.data.token,
+        },
+        () => this.loadMessages()
+      );
       console.log(result.data);
     } catch (err) {
       console.log("err", err.response);
     }
   };
 
-  const saveMessage = (messageText) => {
-    setMessage("");
+  saveMessage = (messageText) => {
+    this.setState({ message: "" });
     firebase
       .firestore()
       .collection("messages")
       .add({
-        room: channel,
-        sentBy: uid,
+        room: this.state.channel,
+        sentBy: this.state.uid,
         text: messageText,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       })
@@ -401,7 +422,7 @@ export default function Chat(props) {
   };
 
   // Saves the messaging device token to the datastore.
-  const saveMessagingDeviceToken = () => {
+  saveMessagingDeviceToken = () => {
     firebase
       .messaging()
       .getToken()
@@ -425,144 +446,135 @@ export default function Chat(props) {
   };
 
   // Requests permissions to show notifications.
-  const requestNotificationsPermissions = () => {
+  requestNotificationsPermissions = () => {
     console.log("Requesting notifications permission...");
     firebase
       .messaging()
       .requestPermission()
       .then(function () {
         // Notification permission granted.
-        saveMessagingDeviceToken();
+        this.saveMessagingDeviceToken();
       })
       .catch(function (error) {
         console.error("Unable to get permission to notify.", error);
       });
   };
 
-  useEffect(() => {
-    document.addEventListener("click", closeEmojiBox);
-    getDetails();
-    requestNotificationsPermissions();
-    loadMessages();
-    return () => {
-      document.removeEventListener("click", closeEmojiBox);
-    };
-  }, [channel]);
+  componentDidMount() {
+    this.getDetails();
+    this.requestNotificationsPermissions();
+  }
 
-  return (
-    <div className={classes.root}>
-      <Paper className={classes.outerCard}>
-        <div className={classes.header}>
-          <IconButton onClick={() => {}}>
-            <BackIcon />
-          </IconButton>
-          {avatar_andy}
-          <span className={classes.title}>Andy</span>
-          <div className={classes.grow} />
-          <Button
-            variant="contained"
-            color="secondary"
-            className={classes.restart}
-          >
-            Restart Chat
-          </Button>
-          <IconButton>
-            <CloseIcon />
-          </IconButton>
-        </div>
-        <Card className={classes.messageCard}>
-          <CardContent>
-            <div id="chatList">
-              {messages.map((data, index) => (
-                <Message
-                  key={index}
-                  // date={data.timestamp.toDate()}
-                  left={!data.sentBy === uid}
-                  right={data.sentBy === uid}
-                  // name={message.by}
-                  // time={data.timestamp}
-                  avatar={message.avatar}
-                  color={data.sentBy === uid ? "primary" : null}
-                  textColor={"black"}
-                >
-                  {data.text ? (
-                    data.text
-                  ) : (
-                    <FileDisplay file={message.file} textColor={"black"} />
-                  )}
-                </Message>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        {showEmoji ? (
-          <div className={classes.emojiContainer} ref={emojiRef}>
-            <EmojiPicker
-              className={classes.emojiPicker}
-              onEmojiClick={(e, emoji) => addToMessage(emoji.emoji)}
-            />
+  render() {
+    return (
+      <div style={styles.root}>
+        <Paper style={styles.outerCard}>
+          <div style={styles.header}>
+            <IconButton onClick={() => {}}>
+              <BackIcon />
+            </IconButton>
+            {avatar_andy}
+            <span style={styles.title}>Andy</span>
+            <div style={styles.grow} />
+            <Button
+              variant="contained"
+              color="secondary"
+              style={styles.restart}
+            >
+              Restart Chat
+            </Button>
+            <IconButton>
+              <CloseIcon />
+            </IconButton>
           </div>
-        ) : null}
-        <div
-          className={classes.cardActions}
-          // onSubmit={(e) => {
-          //   e.preventDefault();
-          //   loadMessages();
-          //   if (message.length === 0) return;
-
-          //   saveMessage(message);
-          // }}
-        >
-          {/* <TextField className={classes.sendMessage} value={message} onChange={({target: {value}})=>setMessage(value)} fullWidth variant="filled" placeholder="Message" /> */}
-          <FormControl fullWidth variant="filled">
-            <FilledInput
-              type="text"
-              className={classes.sendMessage}
-              value={message}
-              onChange={({ target: { value } }) => setMessage(value)}
-              placeholder="Message"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setShowEmoji((c) => !c);
-                    }}
+          <Card style={styles.messageCard}>
+            <CardContent>
+              <div id="chatList" style={styles.messages}>
+                {this.state.messages.map((data, index) => (
+                  <Message
+                    key={index}
+                    // date={data.timestamp.toDate()}
+                    left={!data.sentBy === this.state.uid}
+                    right={data.sentBy === this.state.uid}
+                    // name={message.by}
+                    // time={data.timestamp}
+                    avatar={data.avatar}
+                    color={data.sentBy === this.state.uid ? "primary" : null}
+                    textColor={"black"}
                   >
-                    <SmileIcon />
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-          <Button
-            className={classes.altButton}
-            color="primary"
-            variant="outlined"
+                    {data.text ? (
+                      data.text
+                    ) : (
+                      <FileDisplay file={data.file} textColor={"black"} />
+                    )}
+                  </Message>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          {/* {this.state.showEmoji ? (
+            <div style={styles.emojiContainer} ref={emojiRef}>
+              <EmojiPicker
+                style={styles.emojiPicker}
+                onEmojiClick={(e, emoji) => addToMessage(emoji.emoji)}
+              />
+            </div>
+          ) : null} */}
+          <div
+            style={styles.cardActions}
+            // onSubmit={(e) => {
+            //   e.preventDefault();
+            //   loadMessages();
+            //   if (message.length === 0) return;
+
+            //   saveMessage(message);
+            // }}
           >
-            <AttachIcon />
-          </Button>
-          <Button
-            className={classes.altButton}
-            color="primary"
-            variant="outlined"
-          >
-            <CameraIcon />
-          </Button>
-          <Button
-            className={classes.sendButton}
-            color="primary"
-            variant="contained"
-            type="submit"
-            onClick={() => {
-              if (message.length === 0) return;
-              saveMessage(message);
-            }}
-          >
-            Send
-          </Button>
-        </div>
-      </Paper>
-    </div>
-  );
+            {/* <TextField style={styles.sendMessage} value={message} onChange={({target: {value}})=>setMessage(value)} fullWidth variant="filled" placeholder="Message" /> */}
+            <FormControl fullWidth variant="filled">
+              <FilledInput
+                type="text"
+                style={styles.sendMessage}
+                value={this.state.message}
+                onChange={({ target: { value } }) =>
+                  this.setState({ message: value })
+                }
+                placeholder="Message"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        this.setState({ showEmoji: !this.state.showEmoji });
+                      }}
+                    >
+                      <SmileIcon />
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+            <Button style={styles.altButton} color="primary" variant="outlined">
+              <AttachIcon />
+            </Button>
+            <Button style={styles.altButton} color="primary" variant="outlined">
+              <CameraIcon />
+            </Button>
+            <Button
+              style={styles.sendButton}
+              color="primary"
+              variant="contained"
+              type="submit"
+              onClick={() => {
+                if (this.state.message.length === 0) return;
+                this.saveMessage(this.state.message);
+              }}
+            >
+              Send
+            </Button>
+          </div>
+        </Paper>
+      </div>
+    );
+  }
 }
