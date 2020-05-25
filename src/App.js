@@ -4,7 +4,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import { ThemeProvider } from '@material-ui/core';
 import theme from './settings/theme';
 import Chat from './Pages/Chat/Chat';
-import FireBase from './Config/FireBase';
+// import FireBase from './Config/FireBase';
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 

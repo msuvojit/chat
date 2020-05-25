@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import { makeStyles } from "@material-ui/styles";
 import {
   Card,
@@ -337,6 +336,7 @@ export default class Chat extends React.Component {
       token: "",
     };
   }
+
   // const [messages, setMessages] = useState([]);
   // const [message, setMessage] = useState("");
   // const addToMessage = (emoji) => setMessage((message) => message + emoji);
@@ -361,12 +361,14 @@ export default class Chat extends React.Component {
   loadMessages = () => {
     // Create the query to load the last 12 messages and listen for new ones.
     console.log("loadMessages", this.state.channel);
+
     var query = firebase
       .firestore()
       .collection("messages")
       .where("room", "==", this.state.channel)
       .orderBy("timestamp", "asc")
       .limit(40);
+
     var data = [];
     // Start listening to the query.
     query.onSnapshot((snapshot) => {
