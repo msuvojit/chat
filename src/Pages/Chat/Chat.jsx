@@ -125,6 +125,8 @@ const useChatBubbleStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: (props) => (props && props.left ? 0 : null),
     borderBottomRightRadius: (props) => (props && !props.left ? 0 : null),
     float: (props) => (props && props.left ? null : "right"),
+    "overflow-wrap": "break-word",
+    width: "fit-content"
   },
   info: {
     display: "flex",
@@ -160,6 +162,7 @@ const ChatBubble = ({
     color: color,
     left: isLeft,
     textColor: textColor,
+    "overflow-wrap": "break-word"
   });
 
   return (
@@ -196,6 +199,9 @@ const useMessageStyles = makeStyles((theme) => ({
     fontWeight: 300,
     borderRadius: "10px",
   },
+  msgWrap: {
+    width: "100%"
+  }
 }));
 
 const Message = ({
@@ -221,7 +227,7 @@ const Message = ({
         </div>
       )}
       <div className={classes.root}>
-        <div>
+        <div className={classes.msgWrap}>
           {/* {avatar} */}
           <ChatBubble
             left={left}
@@ -285,6 +291,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
   },
   sendButton: {
+    color: "white",
     paddingTop: "auto",
     paddingBottom: "auto",
     margin: "10px",
@@ -355,9 +362,9 @@ const ChatUI = ({
     <div className={styles.root}>
       <Paper className={styles.outerCard}>
         <div className={styles.header}>
-          <IconButton onClick={() => {}}>
+          {/* <IconButton onClick={() => {}}>
             <BackIcon />
-          </IconButton>
+          </IconButton> */}
           {avatar_andy}
           <div className={styles.title}>Andy</div>
           <div className={styles.grow} />
@@ -368,9 +375,9 @@ const ChatUI = ({
           >
             < RestoreIcon />
           </Button>
-          <IconButton>
+          {/* <IconButton>
             <CloseIcon />
-          </IconButton>
+          </IconButton> */}
         </div>
         <Card className={styles.messageCard}>
           <CardContent>
@@ -423,18 +430,18 @@ const ChatUI = ({
               value={message}
               onChange={({ target: { value } }) => setState({ message: value })}
               placeholder="Message"
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setState({ showEmoji: !showEmoji });
-                    }}
-                  >
-                    <SmileIcon />
-                  </IconButton>
-                </InputAdornment>
-              }
+              // endAdornment={
+              //   <InputAdornment position="end">
+              //     <IconButton
+              //       size="small"
+              //       onClick={() => {
+              //         setState({ showEmoji: !showEmoji });
+              //       }}
+              //     >
+              //       <SmileIcon />
+              //     </IconButton>
+              //   </InputAdornment>
+              // }
             />
           </FormControl>
           <Button
