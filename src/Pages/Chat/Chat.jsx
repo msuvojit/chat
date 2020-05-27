@@ -77,7 +77,7 @@ const useFileDisplayStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-around",
-    alignItems: "center"
+    alignItems: "center",
   },
   icon: {
     color: (props) =>
@@ -367,8 +367,25 @@ const ChatUI = ({
   setState,
   saveImageMessage,
   saveMessage,
+  smallToken,
+  meetingDetails
 }) => {
   const styles = useStyles();
+
+  let chatName = "";
+
+  if (smallToken === meetingDetails.dSmallToken) {
+    chatName = meetingDetails.patientName;
+  } else if (smallToken === meetingDetails.pSmallToken) {
+    chatName = meetingDetails.doctorName;
+  }
+
+  let firstCharChatName = chatName.charAt(0) && chatName.charAt(0).toUpperCase();
+
+  console.log("-----------------");
+  console.log({firstCharChatName});
+  console.log("-----------------");
+
   return (
     <div className={styles.root}>
       <Paper className={styles.outerCard}>
@@ -376,8 +393,19 @@ const ChatUI = ({
           {/* <IconButton onClick={() => {}}>
             <BackIcon />
           </IconButton> */}
-          {avatar_andy}
-          <div className={styles.title}>Andy</div>
+          {/* {avatar_andy} */}
+
+          <Avatar
+            size="32px"
+            avatar={{
+              type: "text",
+              text: firstCharChatName,
+              color: "#ddd",
+              textColor: "black",
+            }}
+          />
+          <div className={styles.title}>{chatName}</div>
+
           <div className={styles.grow} />
           <Button
             variant="contained"
@@ -501,6 +529,8 @@ export default class Chat extends React.Component {
       uid: "",
       channel: "",
       token: "",
+      smallToken: "",
+      meetingDetails: "",
     };
   }
 
@@ -557,9 +587,10 @@ export default class Chat extends React.Component {
   getDetails = async () => {
     try {
       var token = this.props.match.params.token;
-      console.log({ token });
+      // console.log({ token });
       var result = await axios.post(
         "https://notification.opdlift.com/api/agora/meeting-details",
+        // "http://localhost:5001/api/agora/meeting-details",
         { token }
       );
 
@@ -568,6 +599,8 @@ export default class Chat extends React.Component {
           uid: result.data.uid,
           channel: result.data.channel,
           token: result.data.token,
+          smallToken: result.data.smallToken,
+          meetingDetails: result.data.meetingDetails,
         },
         () => this.loadMessages()
       );
@@ -692,6 +725,8 @@ export default class Chat extends React.Component {
       <ChatUI
         uid={this.state.uid}
         messages={this.state.messages}
+        smallToken={this.state.smallToken}
+        meetingDetails={this.state.meetingDetails}
         showEmoji={this.state.showEmoji}
         message={this.state.message}
         setState={this.setState.bind(this)}
