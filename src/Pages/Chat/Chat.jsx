@@ -27,7 +27,7 @@ import Moment from "react-moment";
 import moment from "moment";
 import EmojiPicker from "emoji-picker-react";
 
-import RestoreIcon from '@material-ui/icons/Restore';
+import RestoreIcon from "@material-ui/icons/Restore";
 
 const useAvatarStyles = makeStyles((theme) => ({
   root: {
@@ -72,12 +72,12 @@ const useFileDisplayStyles = makeStyles((theme) => ({
     maxWidth: "100%",
     borderColor: (props) =>
       props && props.textColor ? props.textColor : "black",
-    borderRadius: "10px",
-    padding: "15px",
+    borderRadius: "5px",
+    padding: "10px",
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-around",
-    alignItems: "center",
+    alignItems: "center"
   },
   icon: {
     color: (props) =>
@@ -90,7 +90,8 @@ const useFileDisplayStyles = makeStyles((theme) => ({
       props && props.textColor && props.textColor !== "black"
         ? props.textColor
         : "#555",
-    marginRight: "10px",
+    marginRight: "0",
+    height: "22px",
     // maxWidth: "80%",
     overflow: "hidden",
     wordBreak: "break-all",
@@ -98,14 +99,24 @@ const useFileDisplayStyles = makeStyles((theme) => ({
   },
 }));
 
+const downloadFile = ({ filePath }) => {
+  window.location.href = filePath;
+};
+
 const FileDisplay = ({ file, textColor }) => {
   if (typeof file !== "object") file = { name: file };
 
   const classes = useFileDisplayStyles({ textColor: textColor });
   return (
     <Button variant="outlined" className={classes.root}>
-      <div className={classes.name}>{file.name}</div>
-      <DownloadIcon className={classes.icon} />
+      {/* <div className={classes.name}>{file.name}</div> */}
+      <div className={classes.name}>
+        <a href={file.name} download target="_blank" rel="noopener noreferrer">
+          <img src={"/assets/images/attach.svg"} alt="attachment" height="22" />
+        </a>
+        {/* <p>{file.name}</p> */}
+      </div>
+      {/* <DownloadIcon className={classes.icon} /> */}
     </Button>
   );
 };
@@ -126,7 +137,7 @@ const useChatBubbleStyles = makeStyles((theme) => ({
     borderBottomRightRadius: (props) => (props && !props.left ? 0 : null),
     float: (props) => (props && props.left ? null : "right"),
     "overflow-wrap": "break-word",
-    width: "fit-content"
+    width: "fit-content",
   },
   info: {
     display: "flex",
@@ -162,7 +173,7 @@ const ChatBubble = ({
     color: color,
     left: isLeft,
     textColor: textColor,
-    "overflow-wrap": "break-word"
+    "overflow-wrap": "break-word",
   });
 
   return (
@@ -200,8 +211,8 @@ const useMessageStyles = makeStyles((theme) => ({
     borderRadius: "10px",
   },
   msgWrap: {
-    width: "100%"
-  }
+    width: "100%",
+  },
 }));
 
 const Message = ({
@@ -373,7 +384,7 @@ const ChatUI = ({
             color="secondary"
             className={styles.restart}
           >
-            < RestoreIcon />
+            <RestoreIcon />
           </Button>
           {/* <IconButton>
             <CloseIcon />
@@ -569,6 +580,11 @@ export default class Chat extends React.Component {
   saveImageMessage(file) {
     // 1 - We add a message with a loading icon that will get updated with the shared image.
     console.log(file);
+
+    console.log("inside save image message");
+    console.log(this.state);
+    console.log("inside save image message");
+
     firebase
       .firestore()
       .collection("messages")
@@ -608,7 +624,11 @@ export default class Chat extends React.Component {
 
   saveMessage = (messageText) => {
     this.setState({ message: "" });
+
     console.log("saveMessage");
+
+    console.log({ messageText });
+
     firebase
       .firestore()
       .collection("messages")
@@ -675,8 +695,8 @@ export default class Chat extends React.Component {
         showEmoji={this.state.showEmoji}
         message={this.state.message}
         setState={this.setState.bind(this)}
-        saveImageMessage={this.saveImageMessage}
-        saveMessage={this.saveMessage}
+        saveImageMessage={this.saveImageMessage.bind(this)}
+        saveMessage={this.saveMessage.bind(this)}
       />
     );
   }
