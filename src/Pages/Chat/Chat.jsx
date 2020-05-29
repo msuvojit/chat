@@ -368,7 +368,7 @@ const ChatUI = ({
   saveImageMessage,
   saveMessage,
   smallToken,
-  meetingDetails
+  meetingDetails,
 }) => {
   const styles = useStyles();
 
@@ -380,10 +380,11 @@ const ChatUI = ({
     chatName = meetingDetails.doctorName;
   }
 
-  let firstCharChatName = chatName.charAt(0) && chatName.charAt(0).toUpperCase();
+  let firstCharChatName =
+    chatName.charAt(0) && chatName.charAt(0).toUpperCase();
 
   console.log("-----------------");
-  console.log({firstCharChatName});
+  console.log({ firstCharChatName });
   console.log("-----------------");
 
   return (
@@ -611,6 +612,7 @@ export default class Chat extends React.Component {
   };
 
   saveImageMessage(file) {
+
     // 1 - We add a message with a loading icon that will get updated with the shared image.
     console.log(file);
 
@@ -638,6 +640,12 @@ export default class Chat extends React.Component {
           .then((fileSnapshot) => {
             // 3 - Generate a public URL for the file.
             return fileSnapshot.ref.getDownloadURL().then((url) => {
+
+              console.log("--------");
+              console.log("this is the uploaded url");
+              console.log({url});
+              console.log("--------");
+
               // 4 - Update the chat message placeholder with the image's URL.
               return messageRef
                 .update({
