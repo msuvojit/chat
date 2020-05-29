@@ -26,6 +26,7 @@ import firebase from "firebase";
 import Moment from "react-moment";
 import moment from "moment";
 import EmojiPicker from "emoji-picker-react";
+import io from "socket.io-client";
 
 import RestoreIcon from "@material-ui/icons/Restore";
 
@@ -178,10 +179,10 @@ const ChatBubble = ({
 
   return (
     <div className={classes.root}>
-      {/* <div className={classes.info}>
+      <div className={classes.info}>
         <div className={classes.title}>{name}</div>
-        <div className={classes.sub}>{time}</div>
-      </div> */}
+        {/* <div className={classes.sub}>{time}</div> */}
+      </div>
       {children}
     </div>
   );
@@ -428,7 +429,7 @@ const ChatUI = ({
                   // date={data.timestamp.toDate()}
                   left={!data.sentBy === uid}
                   right={data.sentBy === uid}
-                  // name={message.by}
+                  name={data.name}
                   // time={data.timestamp}
                   avatar={data.avatar}
                   color={data.sentBy === uid ? "primary" : null}
@@ -442,6 +443,7 @@ const ChatUI = ({
                 </Message>
               ))}
             </div>
+         
           </CardContent>
         </Card>
         {/* {showEmoji ? (
@@ -520,6 +522,9 @@ const ChatUI = ({
   );
 };
 
+const ENDPOINT = "http://localhost:5002";
+let socket;
+
 export default class Chat extends React.Component {
   constructor(props) {
     super(props);
@@ -550,12 +555,13 @@ export default class Chat extends React.Component {
   // const [token, setToken] = useState("");
 
   scrollToBottom = () => {
-    var objDiv = document.getElementById("chatList");
+    var objDiv = document.getElementsByClassName("MuiCardContent-root");
     // if (objDiv)
     console.log({ objDiv });
-    objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;
+    objDiv.scrollTop = objDiv.scrollHeight;
+    // objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;
   };
-
+  
   loadMessages = () => {
     // Create the query to load the last 12 messages and listen for new ones.
     console.log("loadMessages", this.state.channel);
@@ -594,16 +600,50 @@ export default class Chat extends React.Component {
         // "http://localhost:5001/api/agora/meeting-details",
         { token }
       );
+      var { smallToken, meetingDetails } = result.data;
+      var chatName;
+      if (smallToken === meetingDetails.dSmallToken) {
+        chatName = meetingDetails.patientName;
+      } else if (smallToken === meetingDetails.pSmallToken) {
+        chatName = meetingDetails.doctorName;
+      }
+      this.setState({ name: chatName });
 
       this.setState(
         {
           uid: result.data.uid,
           channel: result.data.channel,
+          room: result.data.channel,
           token: result.data.token,
           smallToken: result.data.smallToken,
           meetingDetails: result.data.meetingDetails,
         },
-        () => this.loadMessages()
+        () => {
+          socket = io(ENDPOINT);
+          socket.emit(
+            "join",
+            {
+              sentBy: this.state.uid,
+              name: this.state.name,
+              room: this.state.room,
+            },
+            (error) => {
+              if (error) {
+                alert(error);
+              }
+            }
+          );
+
+          socket.on("message", (message) => {
+            this.setState({ messages: [...this.state.messages, message] });
+          });
+
+          socket.on("roomData", ({ users }) => {
+            this.setState({ users });
+          });
+
+          this.getMessages();
+        }
       );
       console.log(result.data);
     } catch (err) {
@@ -611,57 +651,109 @@ export default class Chat extends React.Component {
     }
   };
 
-  saveImageMessage(file) {
+  saveImageMessage = async (file) => {
+    let formData = new FormData();
+    formData.append("file", file);
+    console.log({ file });
+    this.setState({ isLoading: true });
 
-    // 1 - We add a message with a loading icon that will get updated with the shared image.
-    console.log(file);
+    try {
+      var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
 
-    console.log("inside save image message");
-    console.log(this.state);
-    console.log("inside save image message");
+      // var url = "https://a868610d83d1.ngrok.io/video/upload-video";
+      var res = await axios.post(url, formData, {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      });
+      console.log(res.data);
 
-    firebase
-      .firestore()
-      .collection("messages")
-      .add({
+      socket.emit(
+        "sendFile",
+        this.state.channel,
+        this.state.uid,
+        this.state.meetingDetails.patientName,
+        res.data,
+        () => {
+          this.setState({ message: "" });
+        }
+      );
+      var data = {
         room: this.state.channel,
         sentBy: this.state.uid,
-        file: LOADING_IMAGE_URL,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      })
-      .then((messageRef) => {
-        // 2 - Upload the image to Cloud Storage.
-        var filePath = "files/" + this.state.uid + "/" + file.name;
+        name: this.state.name,
+        file: res.data,
+      };
+      var saveFile = await axios.post(ENDPOINT + "/save-file", data);
+      console.log(saveFile.data);
 
-        return firebase
-          .storage()
-          .ref(filePath)
-          .put(file)
-          .then((fileSnapshot) => {
-            // 3 - Generate a public URL for the file.
-            return fileSnapshot.ref.getDownloadURL().then((url) => {
+      // var updateFile = await axios.put(ENDPOINT + "/update-file", {
+      //   id: saveFile.data.id,
+      //   file: res.data,
+      // });
+      // console.log(updateFile.data);
+      this.getMessages();
 
-              console.log("--------");
-              console.log("this is the uploaded url");
-              console.log({url});
-              console.log("--------");
+      this.setState({ isLoading: false });
+    } catch (err) {
+      console.log(err, err.response.data.errors);
+      this.setState({ isLoading: false });
+    }
+  };
 
-              // 4 - Update the chat message placeholder with the image's URL.
-              return messageRef
-                .update({
-                  file: url,
-                })
-                .then(this.loadMessages());
-            });
-          });
-      })
-      .catch(function (error) {
-        console.error(
-          "There was an error uploading a file to Cloud Storage:",
-          error
-        );
-      });
-  }
+  // saveImageMessage(file) {
+  //   // 1 - We add a message with a loading icon that will get updated with the shared image.
+  //   console.log(file);
+
+  //   console.log("inside save image message");
+  //   console.log(this.state);
+  //   console.log("inside save image message");
+
+  //   firebase
+  //     .firestore()
+  //     .collection("messages")
+  //     .add({
+  //       room: this.state.channel,
+  //       sentBy: this.state.uid,
+  //       file: LOADING_IMAGE_URL,
+  //       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  //     })
+  //     .then((messageRef) => {
+  //       // 2 - Upload the image to Cloud Storage.
+  //       var filePath = "files/" + this.state.uid + "/" + file.name;
+
+  //       return firebase
+  //         .storage()
+  //         .ref(filePath)
+  //         .put(file)
+  //         .then((fileSnapshot) => {
+  //           // 3 - Generate a public URL for the file.
+  //           return fileSnapshot.ref.getDownloadURL().then((url) => {
+  //             // 4 - Update the chat message placeholder with the image's URL.
+  //             return messageRef
+  //               .update({
+  //                 file: url,
+  //               })
+  //               .then(this.loadMessages());
+  //           });
+  //         });
+  //     })
+  //     .catch(function (error) {
+  //       console.error(
+  //         "There was an error uploading a file to Cloud Storage:",
+  //         error
+  //       );
+  //     });
+  // }
+
+  getMessages = async () => {
+    try {
+      var result = await axios.get(ENDPOINT + `/${this.state.channel}`);
+      this.setState({ messages: result.data }, () => this.scrollToBottom());
+    } catch (err) {
+      console.log(err.response);
+    }
+  };
 
   saveMessage = (messageText) => {
     this.setState({ message: "" });
@@ -669,19 +761,30 @@ export default class Chat extends React.Component {
     console.log("saveMessage");
 
     console.log({ messageText });
-
-    firebase
-      .firestore()
-      .collection("messages")
-      .add({
-        room: this.state.channel,
-        sentBy: this.state.uid,
-        text: messageText,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      })
-      .catch(function (error) {
-        console.error("Error writing new message to database", error);
-      });
+    if (this.state.message) {
+      socket.emit(
+        "sendMessage",
+        this.state.channel,
+        this.state.uid,
+        this.state.meetingDetails.patientName,
+        this.state.message,
+        () => {
+          this.setState({ message: "" });
+        }
+      );
+    }
+    // firebase
+    //   .firestore()
+    //   .collection("messages")
+    //   .add({
+    //     room: this.state.channel,
+    //     sentBy: this.state.uid,
+    //     text: messageText,
+    //     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    //   })
+    //   .catch(function (error) {
+    //     console.error("Error writing new message to database", error);
+    //   });
   };
 
   // Saves the messaging device token to the datastore.
@@ -729,6 +832,7 @@ export default class Chat extends React.Component {
   }
 
   render() {
+    // console.log(this.state.messages);
     return (
       <ChatUI
         uid={this.state.uid}
