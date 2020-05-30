@@ -523,12 +523,12 @@ const ChatUI = ({
 };
 
 // dev url
-// const SOCKET_ENDPOINT = "http://localhost:5001";
-// const API_ENDPOINT = "http://localhost:5001/api/chat";
+const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
+const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
-const SOCKET_ENDPOINT = "https://notification.opdlift.com";
-const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
+// const SOCKET_ENDPOINT = "https://notification.opdlift.com";
+// const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
 
 // initialize the socket instance
 let socket;
@@ -604,7 +604,7 @@ export default class Chat extends React.Component {
       var token = this.props.match.params.token;
       // console.log({ token });
       var result = await axios.post(
-        "https://notification.opdlift.com/api/agora/meeting-details",
+        "https://tranquil-refuge-61737.herokuapp.com/api/agora/meeting-details",
         // "http://localhost:5001/api/agora/meeting-details",
         { token }
       );
@@ -667,14 +667,15 @@ export default class Chat extends React.Component {
 
     try {
 
-      var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
-      // var url = "https://a868610d83d1.ngrok.io/video/upload-video";
+      // var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
+      var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
 
       var res = await axios.post(url, formData, {
         headers: {
           "content-type": "multipart/form-data",
         },
       });
+      
       console.log(res.data);
 
       socket.emit(
