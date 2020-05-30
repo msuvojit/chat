@@ -523,7 +523,7 @@ const ChatUI = ({
 };
 
 // const ENDPOINT = "https://notification.opdlift.com";
-const ENDPOINT = "https://notification.opdlift.com:5002";
+const ENDPOINT = "http://notification.opdlift.com:5002";
 let socket;
 
 export default class Chat extends React.Component {
