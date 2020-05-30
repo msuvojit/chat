@@ -22,7 +22,7 @@ import DownloadIcon from "@material-ui/icons/CloudDownload";
 
 import green from "@material-ui/core/colors/green";
 import sec from "@material-ui/core/colors/blueGrey";
-import firebase from "firebase";
+// import firebase from "firebase";
 import Moment from "react-moment";
 import moment from "moment";
 import EmojiPicker from "emoji-picker-react";
@@ -180,7 +180,7 @@ const ChatBubble = ({
   return (
     <div className={classes.root}>
       <div className={classes.info}>
-        <div className={classes.title}>{name}</div>
+        {/* <div className={classes.title}>{name}</div> */}
         {/* <div className={classes.sub}>{time}</div> */}
       </div>
       {children}
@@ -522,7 +522,8 @@ const ChatUI = ({
   );
 };
 
-const ENDPOINT = "http://localhost:5002";
+// const ENDPOINT = "https://notification.opdlift.com";
+const ENDPOINT = "https://notification.opdlift.com:5002";
 let socket;
 
 export default class Chat extends React.Component {
@@ -566,29 +567,29 @@ export default class Chat extends React.Component {
     // Create the query to load the last 12 messages and listen for new ones.
     console.log("loadMessages", this.state.channel);
 
-    var query = firebase
-      .firestore()
-      .collection("messages")
-      .where("room", "==", this.state.channel)
-      .orderBy("timestamp", "asc")
-      .limit(40);
+    // var query = firebase
+    //   .firestore()
+    //   .collection("messages")
+    //   .where("room", "==", this.state.channel)
+    //   .orderBy("timestamp", "asc")
+    //   .limit(40);
 
-    var data = [];
+    // var data = [];
     // Start listening to the query.
-    query.onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "removed") {
-          //   deleteMessage(change.doc.id);
-        } else {
-          var message = change.doc.data();
-          message.timestamp && data.push(message);
-          // console.log(message.timestamp && message.timestamp.toDate());
-        }
-      });
+    // query.onSnapshot((snapshot) => {
+    //   snapshot.docChanges().forEach((change) => {
+    //     if (change.type === "removed") {
+    //       //   deleteMessage(change.doc.id);
+    //     } else {
+    //       var message = change.doc.data();
+    //       message.timestamp && data.push(message);
+    //       // console.log(message.timestamp && message.timestamp.toDate());
+    //     }
+    //   });
 
-      console.log(data.length);
-      this.setState({ messages: data }, () => this.scrollToBottom());
-    });
+      // console.log(data.length);
+      // this.setState({ messages: data }, () => this.scrollToBottom());
+    // });
   };
 
   getDetails = async () => {
@@ -658,9 +659,10 @@ export default class Chat extends React.Component {
     this.setState({ isLoading: true });
 
     try {
-      var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
 
+      var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
       // var url = "https://a868610d83d1.ngrok.io/video/upload-video";
+
       var res = await axios.post(url, formData, {
         headers: {
           "content-type": "multipart/form-data",
@@ -789,41 +791,41 @@ export default class Chat extends React.Component {
 
   // Saves the messaging device token to the datastore.
   saveMessagingDeviceToken = () => {
-    firebase
-      .messaging()
-      .getToken()
-      .then(function (currentToken) {
-        if (currentToken) {
-          console.log("Got FCM device token:", currentToken);
-          // Saving the Device Token to the datastore.
-          firebase
-            .firestore()
-            .collection("fcmTokens")
-            .doc(currentToken)
-            .set({ uid: firebase.auth().currentUser.uid });
-        } else {
-          // Need to request permissions to show notifications.
-          this.requestNotificationsPermissions();
-        }
-      })
-      .catch(function (error) {
-        console.error("Unable to get messaging token.", error);
-      });
+    // firebase
+    //   .messaging()
+    //   .getToken()
+    //   .then(function (currentToken) {
+    //     if (currentToken) {
+    //       console.log("Got FCM device token:", currentToken);
+    //       // Saving the Device Token to the datastore.
+    //       firebase
+    //         .firestore()
+    //         .collection("fcmTokens")
+    //         .doc(currentToken)
+    //         .set({ uid: firebase.auth().currentUser.uid });
+    //     } else {
+    //       // Need to request permissions to show notifications.
+    //       this.requestNotificationsPermissions();
+    //     }
+    //   })
+    //   .catch(function (error) {
+    //     console.error("Unable to get messaging token.", error);
+    //   });
   };
 
   // Requests permissions to show notifications.
   requestNotificationsPermissions = () => {
     console.log("Requesting notifications permission...");
-    firebase
-      .messaging()
-      .requestPermission()
-      .then(function () {
-        // Notification permission granted.
-        this.saveMessagingDeviceToken();
-      })
-      .catch(function (error) {
-        console.error("Unable to get permission to notify.", error);
-      });
+    // firebase
+    //   .messaging()
+    //   .requestPermission()
+    //   .then(function () {
+    //     // Notification permission granted.
+    //     this.saveMessagingDeviceToken();
+    //   })
+    //   .catch(function (error) {
+    //     console.error("Unable to get permission to notify.", error);
+    //   });
   };
 
   componentDidMount() {
