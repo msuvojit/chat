@@ -522,8 +522,15 @@ const ChatUI = ({
   );
 };
 
-// const ENDPOINT = "https://notification.opdlift.com";
-const ENDPOINT = "http://notification.opdlift.com:5002";
+// dev url
+// const SOCKET_ENDPOINT = "http://localhost:5001";
+// const API_ENDPOINT = "http://localhost:5001/api/chat";
+
+// production url
+const SOCKET_ENDPOINT = "https://notification.opdlift.com";
+const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
+
+// initialize the socket instance
 let socket;
 
 export default class Chat extends React.Component {
@@ -620,7 +627,7 @@ export default class Chat extends React.Component {
           meetingDetails: result.data.meetingDetails,
         },
         () => {
-          socket = io(ENDPOINT);
+          socket = io(SOCKET_ENDPOINT);
           socket.emit(
             "join",
             {
@@ -686,7 +693,7 @@ export default class Chat extends React.Component {
         name: this.state.name,
         file: res.data,
       };
-      var saveFile = await axios.post(ENDPOINT + "/save-file", data);
+      var saveFile = await axios.post(API_ENDPOINT + "/save-file", data);
       console.log(saveFile.data);
 
       // var updateFile = await axios.put(ENDPOINT + "/update-file", {
@@ -750,7 +757,7 @@ export default class Chat extends React.Component {
 
   getMessages = async () => {
     try {
-      var result = await axios.get(ENDPOINT + `/${this.state.channel}`);
+      var result = await axios.get(API_ENDPOINT + `/${this.state.channel}`);
       this.setState({ messages: result.data }, () => this.scrollToBottom());
     } catch (err) {
       console.log(err.response);
