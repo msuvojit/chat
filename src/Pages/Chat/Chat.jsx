@@ -409,16 +409,19 @@ const ChatUI = ({
           <div className={styles.title}>{chatName}</div>
 
           <div className={styles.grow} />
-          <Button
+
+          {/* <Button
             variant="contained"
             color="secondary"
             className={styles.restart}
           >
             <RestoreIcon />
-          </Button>
+          </Button> */}
+
           {/* <IconButton>
             <CloseIcon />
           </IconButton> */}
+          
         </div>
         <Card className={styles.messageCard}>
           <CardContent>
