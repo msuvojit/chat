@@ -293,6 +293,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#eee",
     display: "flex",
     flexDirection: "column",
+    width: "100vw"
   },
   cardActions: {
     flexShrink: "1",
@@ -421,7 +422,7 @@ const ChatUI = ({
           {/* <IconButton>
             <CloseIcon />
           </IconButton> */}
-          
+
         </div>
         <Card className={styles.messageCard}>
           <CardContent>
