@@ -463,7 +463,7 @@ const ChatUI = ({
           ) : null} */}
         <div
           className={styles.cardActions}
-          style={{ position: "absolute", bottom: 0 }}
+          style={{ position: "fixed", bottom: 0 }}
           // onSubmit={(e) => {
           //   e.preventDefault();
           //   loadMessages();
@@ -531,7 +531,8 @@ const ChatUI = ({
 };
 
 // dev url
-// const SOCKET_ENDPOINT = "http://localhost:5002";
+// const SOCKET_ENDPOINT = "http://localhost:5001";
+// const API_ENDPOINT = "http://localhost:5001/api/chat";
 
 const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
 const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
@@ -642,8 +643,8 @@ export default class Chat extends React.Component {
     this.setState({ isLoading: true });
 
     try {
-      var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
-      // var url = API_ENDPOINT + "/upload-file";
+      // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
+      var url = API_ENDPOINT + "/upload-file";
       var res = await axios.post(url, formData, {
         headers: {
           "content-type": "multipart/form-data",
