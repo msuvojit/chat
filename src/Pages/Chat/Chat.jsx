@@ -293,12 +293,13 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#eee",
     display: "flex",
     flexDirection: "column",
-    width: "100vw"
+    width: "100vw",
   },
   cardActions: {
     flexShrink: "1",
     display: "flex",
     width: "100%",
+    backgroundColor: "#eee",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -329,7 +330,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#FCEBDC",
     overflowY: "auto",
     flexGrow: "1",
-    minHeight: "80%",
+    minHeight: "75%",
     // maxHeight: "90vh",
   },
   title: {
@@ -422,11 +423,14 @@ const ChatUI = ({
           {/* <IconButton>
             <CloseIcon />
           </IconButton> */}
-
         </div>
         <Card className={styles.messageCard}>
           <CardContent>
-            <div id="chatList" className={styles.messages}>
+            <div
+              id="chatList"
+              className={styles.messages}
+              style={{ paddingBottom: "50px" }}
+            >
               {messages.map((data, index) => (
                 <Message
                   key={index}
@@ -447,7 +451,6 @@ const ChatUI = ({
                 </Message>
               ))}
             </div>
-         
           </CardContent>
         </Card>
         {/* {showEmoji ? (
@@ -460,6 +463,7 @@ const ChatUI = ({
           ) : null} */}
         <div
           className={styles.cardActions}
+          style={{ position: "absolute", bottom: 0 }}
           // onSubmit={(e) => {
           //   e.preventDefault();
           //   loadMessages();
@@ -527,6 +531,8 @@ const ChatUI = ({
 };
 
 // dev url
+// const SOCKET_ENDPOINT = "http://localhost:5002";
+
 const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
 const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
@@ -552,55 +558,15 @@ export default class Chat extends React.Component {
     };
   }
 
-  // const [messages, setMessages] = useState([]);
-  // const [message, setMessage] = useState("");
-  // const addToMessage = (emoji) => setMessage((message) => message + emoji);
-  // const [showEmoji, setShowEmoji] = useState(false);
-  // const emojiRef = useRef();
-  // const closeEmojiBox = (e) => {
-  //   if (!showEmoji) return;
-  //   if (!emojiRef || !emojiRef.current || !emojiRef.current.contains(e.target))
-  //     setShowEmoji(false);
-  // };
-  // const [uid, setUid] = useState("");
-  // const [channel, setChannel] = useState("");
-  // const [token, setToken] = useState("");
-
   scrollToBottom = () => {
-    var objDiv = document.getElementsByClassName("MuiCardContent-root");
-    // if (objDiv)
-    console.log({ objDiv });
-    objDiv.scrollTop = objDiv.scrollHeight;
+    document
+      .getElementById("chatList")
+      .scrollIntoView({ behavior: "smooth", block: "end" });
+    // var objDiv = document.getElementsByClassName("MuiCardContent-root");
+    // var objDiv = document.getElementById("chatList");
+    // console.log({ objDiv });
+    // objDiv.scrollTop = objDiv.scrollHeight;
     // objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;
-  };
-  
-  loadMessages = () => {
-    // Create the query to load the last 12 messages and listen for new ones.
-    console.log("loadMessages", this.state.channel);
-
-    // var query = firebase
-    //   .firestore()
-    //   .collection("messages")
-    //   .where("room", "==", this.state.channel)
-    //   .orderBy("timestamp", "asc")
-    //   .limit(40);
-
-    // var data = [];
-    // Start listening to the query.
-    // query.onSnapshot((snapshot) => {
-    //   snapshot.docChanges().forEach((change) => {
-    //     if (change.type === "removed") {
-    //       //   deleteMessage(change.doc.id);
-    //     } else {
-    //       var message = change.doc.data();
-    //       message.timestamp && data.push(message);
-    //       // console.log(message.timestamp && message.timestamp.toDate());
-    //     }
-    //   });
-
-      // console.log(data.length);
-      // this.setState({ messages: data }, () => this.scrollToBottom());
-    // });
   };
 
   getDetails = async () => {
@@ -647,7 +613,13 @@ export default class Chat extends React.Component {
           );
 
           socket.on("message", (message) => {
-            this.setState({ messages: [...this.state.messages, message] });
+            this.setState(
+              { messages: [...this.state.messages, message] },
+              () => {
+                console.log("socket.on message");
+                this.scrollToBottom();
+              }
+            );
           });
 
           socket.on("roomData", ({ users }) => {
@@ -670,16 +642,16 @@ export default class Chat extends React.Component {
     this.setState({ isLoading: true });
 
     try {
-
       // var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
-      var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
+      var url =
+        "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
 
       var res = await axios.post(url, formData, {
         headers: {
           "content-type": "multipart/form-data",
         },
       });
-      
+
       console.log(res.data);
 
       socket.emit(
@@ -715,54 +687,9 @@ export default class Chat extends React.Component {
     }
   };
 
-  // saveImageMessage(file) {
-  //   // 1 - We add a message with a loading icon that will get updated with the shared image.
-  //   console.log(file);
-
-  //   console.log("inside save image message");
-  //   console.log(this.state);
-  //   console.log("inside save image message");
-
-  //   firebase
-  //     .firestore()
-  //     .collection("messages")
-  //     .add({
-  //       room: this.state.channel,
-  //       sentBy: this.state.uid,
-  //       file: LOADING_IMAGE_URL,
-  //       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-  //     })
-  //     .then((messageRef) => {
-  //       // 2 - Upload the image to Cloud Storage.
-  //       var filePath = "files/" + this.state.uid + "/" + file.name;
-
-  //       return firebase
-  //         .storage()
-  //         .ref(filePath)
-  //         .put(file)
-  //         .then((fileSnapshot) => {
-  //           // 3 - Generate a public URL for the file.
-  //           return fileSnapshot.ref.getDownloadURL().then((url) => {
-  //             // 4 - Update the chat message placeholder with the image's URL.
-  //             return messageRef
-  //               .update({
-  //                 file: url,
-  //               })
-  //               .then(this.loadMessages());
-  //           });
-  //         });
-  //     })
-  //     .catch(function (error) {
-  //       console.error(
-  //         "There was an error uploading a file to Cloud Storage:",
-  //         error
-  //       );
-  //     });
-  // }
-
   getMessages = async () => {
     try {
-      var result = await axios.get(API_ENDPOINT + `/${this.state.channel}`);
+      var result = await axios.get(SOCKET_ENDPOINT + `/${this.state.channel}`);
       this.setState({ messages: result.data }, () => this.scrollToBottom());
     } catch (err) {
       console.log(err.response);
@@ -784,6 +711,7 @@ export default class Chat extends React.Component {
         this.state.message,
         () => {
           this.setState({ message: "" });
+          this.scrollToBottom();
         }
       );
     }
@@ -801,48 +729,8 @@ export default class Chat extends React.Component {
     //   });
   };
 
-  // Saves the messaging device token to the datastore.
-  saveMessagingDeviceToken = () => {
-    // firebase
-    //   .messaging()
-    //   .getToken()
-    //   .then(function (currentToken) {
-    //     if (currentToken) {
-    //       console.log("Got FCM device token:", currentToken);
-    //       // Saving the Device Token to the datastore.
-    //       firebase
-    //         .firestore()
-    //         .collection("fcmTokens")
-    //         .doc(currentToken)
-    //         .set({ uid: firebase.auth().currentUser.uid });
-    //     } else {
-    //       // Need to request permissions to show notifications.
-    //       this.requestNotificationsPermissions();
-    //     }
-    //   })
-    //   .catch(function (error) {
-    //     console.error("Unable to get messaging token.", error);
-    //   });
-  };
-
-  // Requests permissions to show notifications.
-  requestNotificationsPermissions = () => {
-    console.log("Requesting notifications permission...");
-    // firebase
-    //   .messaging()
-    //   .requestPermission()
-    //   .then(function () {
-    //     // Notification permission granted.
-    //     this.saveMessagingDeviceToken();
-    //   })
-    //   .catch(function (error) {
-    //     console.error("Unable to get permission to notify.", error);
-    //   });
-  };
-
   componentDidMount() {
     this.getDetails();
-    this.requestNotificationsPermissions();
   }
 
   render() {
