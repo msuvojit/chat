@@ -541,12 +541,12 @@ const ChatUI = ({
 // const SOCKET_ENDPOINT = "http://localhost:5001";
 // const API_ENDPOINT = "http://localhost:5001/api/chat";
 
-const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
-const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
+// const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
+// const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
-// const SOCKET_ENDPOINT = "https://notification.opdlift.com";
-// const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
+const SOCKET_ENDPOINT = "https://notification.opdlift.com";
+const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
 
 // initialize the socket instance
 let socket;
