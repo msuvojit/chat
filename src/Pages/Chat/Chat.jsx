@@ -642,10 +642,8 @@ export default class Chat extends React.Component {
     this.setState({ isLoading: true });
 
     try {
-      // var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
-      var url =
-        "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
-
+      var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
+      // var url = API_ENDPOINT + "/upload-file";
       var res = await axios.post(url, formData, {
         headers: {
           "content-type": "multipart/form-data",
@@ -689,7 +687,7 @@ export default class Chat extends React.Component {
 
   getMessages = async () => {
     try {
-      var result = await axios.get(SOCKET_ENDPOINT + `/${this.state.channel}`);
+      var result = await axios.get(API_ENDPOINT + `/${this.state.channel}`);
       this.setState({ messages: result.data }, () => this.scrollToBottom());
     } catch (err) {
       console.log(err.response);
