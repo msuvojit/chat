@@ -478,6 +478,13 @@ const ChatUI = ({
               type="text"
               className={styles.sendMessage}
               value={message}
+              onKeyDown={(e) => {
+                console.log(e.key);
+                if (e.key === "Enter") {
+                  if (message.length === 0) return;
+                  saveMessage(message);
+                }
+              }}
               onChange={({ target: { value } }) => setState({ message: value })}
               placeholder="Message"
               // endAdornment={
