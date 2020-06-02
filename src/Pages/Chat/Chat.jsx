@@ -435,7 +435,7 @@ const ChatUI = ({
             <div
               id="chatList"
               className={styles.messages}
-              style={{ paddingBottom: "50px" }}
+              style={{ paddingBottom: "50px", paddingTop: "50px" }}
             >
               {messages.map((data, index) => (
                 <Message
