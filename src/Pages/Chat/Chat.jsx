@@ -344,6 +344,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     color: "#777",
     padding: "10px",
+    position: "sticky"
   },
   grow: {
     flexGrow: "1",
