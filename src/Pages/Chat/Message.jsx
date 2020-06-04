@@ -39,6 +39,7 @@ const Message = ({
   textColor,
   avatar,
   date,
+  time,
 }) => {
   const isLeft = left || !right;
   const classes = useMessageStyles({ left: isLeft });

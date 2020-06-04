@@ -10,6 +10,7 @@ import {
   FilledInput,
   InputAdornment,
   FormControl,
+  Tooltip,
 } from "@material-ui/core";
 import axios from "axios";
 import MessageIcon from "@material-ui/icons/Message";
@@ -122,6 +123,18 @@ const FileDisplay = ({ file, textColor }) => {
   );
 };
 
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+}
+
+
 const useChatBubbleStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: (props) =>
@@ -143,9 +156,9 @@ const useChatBubbleStyles = makeStyles((theme) => ({
   info: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "flex-end",
-    marginBottom: "7px",
+    marginTop: "7px",
   },
   title: {
     fontWeight: 500,
@@ -179,11 +192,11 @@ const ChatBubble = ({
 
   return (
     <div className={classes.root}>
+      {children}
       <div className={classes.info}>
         {/* <div className={classes.title}>{name}</div> */}
-        {/* <div className={classes.sub}>{time}</div> */}
+        <div className={classes.sub}>{formatAMPM(time)}</div>
       </div>
-      {children}
     </div>
   );
 };
@@ -344,6 +357,12 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     color: "#777",
     padding: "10px",
+    backgroundColor: "#eee",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    "z-index": 99999
   },
   grow: {
     flexGrow: "1",
@@ -429,12 +448,12 @@ const ChatUI = ({
             <div
               id="chatList"
               className={styles.messages}
-              style={{ paddingBottom: "50px" }}
+              style={{ paddingBottom: "50px", paddingTop: "50px" }}
             >
               {messages.map((data, index) => (
                 <Message
                   key={index}
-                  // date={data.timestamp.toDate()}
+                  time={ new Date(data.createdAt) }
                   left={!data.sentBy === uid}
                   right={data.sentBy === uid}
                   name={data.name}
@@ -463,7 +482,7 @@ const ChatUI = ({
           ) : null} */}
         <div
           className={styles.cardActions}
-          style={{ position: "absolute", bottom: 0 }}
+          style={{ position: "fixed", bottom: 0 }}
           // onSubmit={(e) => {
           //   e.preventDefault();
           //   loadMessages();
@@ -478,6 +497,13 @@ const ChatUI = ({
               type="text"
               className={styles.sendMessage}
               value={message}
+              onKeyDown={(e) => {
+                console.log(e.key);
+                if (e.key === "Enter") {
+                  if (message.length === 0) return;
+                  saveMessage(message);
+                }
+              }}
               onChange={({ target: { value } }) => setState({ message: value })}
               placeholder="Message"
               // endAdornment={
@@ -494,14 +520,16 @@ const ChatUI = ({
               // }
             />
           </FormControl>
-          <Button
-            className={styles.altButton}
-            color="primary"
-            variant="outlined"
-            onClick={() => document.getElementById("file-upload").click()}
-          >
-            <AttachIcon />
-          </Button>
+          <Tooltip title="Click To Open">
+            <Button
+              className={styles.altButton}
+              color="primary"
+              variant="outlined"
+              onClick={() => document.getElementById("file-upload").click()}
+            >
+              <AttachIcon />
+            </Button>
+          </Tooltip>
           <input
             id="file-upload"
             type="file"
@@ -531,14 +559,15 @@ const ChatUI = ({
 };
 
 // dev url
-// const SOCKET_ENDPOINT = "http://localhost:5002";
+// const SOCKET_ENDPOINT = "http://localhost:5001";
+// const API_ENDPOINT = "http://localhost:5001/api/chat";
 
-const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
-const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
+// const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
+// const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
-// const SOCKET_ENDPOINT = "https://notification.opdlift.com";
-// const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
+const SOCKET_ENDPOINT = "https://notification.opdlift.com";
+const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
 
 // initialize the socket instance
 let socket;
@@ -614,7 +643,7 @@ export default class Chat extends React.Component {
 
           socket.on("message", (message) => {
             this.setState(
-              { messages: [...this.state.messages, message] },
+              { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
               () => {
                 console.log("socket.on message");
                 this.scrollToBottom();
@@ -642,10 +671,8 @@ export default class Chat extends React.Component {
     this.setState({ isLoading: true });
 
     try {
-      // var url = "https://67qllgmlgh.execute-api.us-east-2.amazonaws.com/prod/video/upload-video";
-      var url =
-        "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
-
+      // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
+      var url = API_ENDPOINT + "/upload-file";
       var res = await axios.post(url, formData, {
         headers: {
           "content-type": "multipart/form-data",
@@ -689,7 +716,7 @@ export default class Chat extends React.Component {
 
   getMessages = async () => {
     try {
-      var result = await axios.get(SOCKET_ENDPOINT + `/${this.state.channel}`);
+      var result = await axios.get(API_ENDPOINT + `/${this.state.channel}`);
       this.setState({ messages: result.data }, () => this.scrollToBottom());
     } catch (err) {
       console.log(err.response);
@@ -734,6 +761,7 @@ export default class Chat extends React.Component {
   }
 
   render() {
+    console.log(this.state.messages);
     // console.log(this.state.messages);
     return (
       <ChatUI
