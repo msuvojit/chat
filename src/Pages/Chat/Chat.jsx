@@ -193,13 +193,24 @@ const ChatBubble = ({
   return (
     <div className={classes.root}>
       {children}
+      {
+        !time ? null :
       <div className={classes.info}>
         {/* <div className={classes.title}>{name}</div> */}
         <div className={classes.sub}>{formatAMPM(time)}</div>
       </div>
+      }
     </div>
   );
 };
+
+const getDateStr = (date)=>{
+  const date_p = date.split('T')[0].split('-');
+  const day = date_p[2];
+  const month = date_p[1];
+  const year = date_p[0];
+  return `${day}/${month}/${year}`;
+}
 
 const useMessageStyles = makeStyles((theme) => ({
   root: {
@@ -247,7 +258,8 @@ const Message = ({
       {!date ? null : (
         <div className={classes.dateContainer}>
           <div className={classes.dateBox}>
-            <Moment format="hh:mm">{moment(date, "hh:mm a")}</Moment>
+            {date.toString()}
+            {/* <Moment format="hh:mm">{moment(date, "hh:mm a")}</Moment> */}
           </div>
         </div>
       )}
@@ -450,10 +462,20 @@ const ChatUI = ({
               className={styles.messages}
               style={{ paddingBottom: "50px", paddingTop: "50px" }}
             >
-              {messages.map((data, index) => (
+              {messages.map((data, index) => {
+                 const today = getDateStr(data.createdAt);
+                 const yday = index > 0 && getDateStr(messages[index-1].createdAt);
+                 console.log("Today Raw", data.createdAt)
+                 console.log("Yday Raw", index > 0 && messages[index-1].createdAt)
+                 console.log("Today", today)
+                 console.log("YDay", yday)
+                 console.log("Eq", today == yday)
+                 console.log("Eq Eq", today === yday)
+                return (
                 <Message
                   key={index}
-                  time={ new Date(data.createdAt) }
+                  // time={ new Date(data.createdAt) }
+                  date={(index > 0 && (today === yday)) ? null : today }
                   left={!data.sentBy === uid}
                   right={data.sentBy === uid}
                   name={data.name}
@@ -468,7 +490,7 @@ const ChatUI = ({
                     <FileDisplay file={data.file} textColor={"black"} />
                   )}
                 </Message>
-              ))}
+                 )})}
             </div>
           </CardContent>
         </Card>
