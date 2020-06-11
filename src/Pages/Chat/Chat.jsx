@@ -10,6 +10,7 @@ import {
   FilledInput,
   InputAdornment,
   FormControl,
+  Tooltip,
 } from "@material-ui/core";
 import axios from "axios";
 import MessageIcon from "@material-ui/icons/Message";
@@ -122,6 +123,18 @@ const FileDisplay = ({ file, textColor }) => {
   );
 };
 
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+}
+
+
 const useChatBubbleStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: (props) =>
@@ -143,9 +156,9 @@ const useChatBubbleStyles = makeStyles((theme) => ({
   info: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "flex-end",
-    marginBottom: "7px",
+    marginTop: "7px",
   },
   title: {
     fontWeight: 500,
@@ -179,11 +192,11 @@ const ChatBubble = ({
 
   return (
     <div className={classes.root}>
+      {children}
       <div className={classes.info}>
         {/* <div className={classes.title}>{name}</div> */}
-        {/* <div className={classes.sub}>{time}</div> */}
+        <div className={classes.sub}>{formatAMPM(time)}</div>
       </div>
-      {children}
     </div>
   );
 };
@@ -440,7 +453,7 @@ const ChatUI = ({
               {messages.map((data, index) => (
                 <Message
                   key={index}
-                  // date={data.timestamp.toDate()}
+                  time={ new Date(data.createdAt) }
                   left={!data.sentBy === uid}
                   right={data.sentBy === uid}
                   name={data.name}
@@ -507,14 +520,16 @@ const ChatUI = ({
               // }
             />
           </FormControl>
-          <Button
-            className={styles.altButton}
-            color="primary"
-            variant="outlined"
-            onClick={() => document.getElementById("file-upload").click()}
-          >
-            <AttachIcon />
-          </Button>
+          <Tooltip title="Click To Open">
+            <Button
+              className={styles.altButton}
+              color="primary"
+              variant="outlined"
+              onClick={() => document.getElementById("file-upload").click()}
+            >
+              <AttachIcon />
+            </Button>
+          </Tooltip>
           <input
             id="file-upload"
             type="file"
@@ -633,7 +648,7 @@ export default class Chat extends React.Component {
 
           socket.on("message", (message) => {
             this.setState(
-              { messages: [...this.state.messages, message] },
+              { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
               () => {
                 console.log("socket.on message");
                 this.scrollToBottom();
@@ -757,6 +772,7 @@ export default class Chat extends React.Component {
   }
 
   render() {
+    console.log(this.state.messages);
     // console.log(this.state.messages);
     return (
       <ChatUI
