@@ -551,8 +551,14 @@ const ChatUI = ({
 // const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
-const SOCKET_ENDPOINT = "https://notification.opdlift.com";
-const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
+
+const HOME_ROUTE = "https://notification.opdlift.com";
+// const HOME_ROUTE = "http://localhost:5001";
+
+const API_ENDPOINT = HOME_ROUTE + "/api/chat";
+
+const SOCKET_ENDPOINT = HOME_ROUTE;
+
 
 // initialize the socket instance
 let socket;
@@ -586,10 +592,9 @@ export default class Chat extends React.Component {
   getDetails = async () => {
     try {
       var token = this.props.match.params.token;
-      // console.log({ token });
+
       var result = await axios.post(
-        "https://tranquil-refuge-61737.herokuapp.com/api/agora/meeting-details",
-        // "http://localhost:5001/api/agora/meeting-details",
+        HOME_ROUTE +  "/api/agora/meeting-details",
         { token }
       );
       var { smallToken, meetingDetails } = result.data;
@@ -652,11 +657,14 @@ export default class Chat extends React.Component {
   saveImageMessage = async (file) => {
     let formData = new FormData();
     formData.append("file", file);
+
+    console.log("----- PRINT THE FILE ----");
     console.log({ file });
+    console.log("----- PRINT THE FILE ----");
+
     this.setState({ isLoading: true });
 
     try {
-      // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
       var url = API_ENDPOINT + "/upload-file";
       var res = await axios.post(url, formData, {
         headers: {
@@ -694,7 +702,10 @@ export default class Chat extends React.Component {
 
       this.setState({ isLoading: false });
     } catch (err) {
-      console.log(err, err.response.data.errors);
+
+      console.log({err});
+
+      console.log(err, err && err.response && err.response.data && err.response.data.errors);
       this.setState({ isLoading: false });
     }
   };
