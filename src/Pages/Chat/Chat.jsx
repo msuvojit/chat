@@ -105,23 +105,38 @@ const downloadFile = ({ filePath }) => {
   window.location.href = filePath;
 };
 
-const FileDisplay = ({ file, textColor }) => {
+const FileDisplay = ({ file, textColor, name }) => {
   if (typeof file !== "object") file = { name: file };
-
+  // console.log("File: ", file, " | Name: ", name);
   const classes = useFileDisplayStyles({ textColor: textColor });
+  const ns = file.name ? file.name.split('/') : "";
+  let file_name = name ? name : ns.length > 0 ? ns[ns.length - 1]:"Unknown File";
+  file_name = file_name.length>33?(file_name.substring(0,30)+"..."):file_name;
   return (
-    <Button variant="outlined" className={classes.root}>
-      {/* <div className={classes.name}>{file.name}</div> */}
-      <div className={classes.name}>
-        <a href={file.name} download target="_blank" rel="noopener noreferrer">
-          <img src={"/assets/images/attach.svg"} alt="attachment" height="22" />
-        </a>
-        {/* <p>{file.name}</p> */}
-      </div>
-      {/* <DownloadIcon className={classes.icon} /> */}
+    <Button variant="outlined" className={classes.root} component="a" href={file.file || ""} download target="_blank" rel="noopener noreferrer">
+      <div className={classes.name}>{file_name}</div>
+      <DownloadIcon className={classes.icon} />
     </Button>
   );
 };
+
+// const FileDisplay = ({ file, textColor }) => {
+//   if (typeof file !== "object") file = { name: file };
+
+//   const classes = useFileDisplayStyles({ textColor: textColor });
+//   return (
+//     <Button variant="outlined" className={classes.root}>
+//       {/* <div className={classes.name}>{file.name}</div> */}
+//       <div className={classes.name}>
+//         <a href={file.name} download target="_blank" rel="noopener noreferrer">
+//           <img src={"/assets/images/attach.svg"} alt="attachment" height="22" />
+//         </a>
+//         {/* <p>{file.name}</p> */}
+//       </div>
+//       {/* <DownloadIcon className={classes.icon} /> */}
+//     </Button>
+//   );
+// };
 
 function formatAMPM(date) {
   var hours = date.getHours();
@@ -193,13 +208,27 @@ const ChatBubble = ({
   return (
     <div className={classes.root}>
       {children}
+      {
+        !time ? null :
       <div className={classes.info}>
         {/* <div className={classes.title}>{name}</div> */}
         <div className={classes.sub}>{formatAMPM(time)}</div>
       </div>
+      }
     </div>
   );
 };
+
+const getDateStr = (date)=>{
+  const date_t = new Date(date);
+  // console.log("DATE: ", date, date_t);
+  return date_t.toLocaleDateString("en-US", {year: "numeric", month: "numeric", day: "numeric"});
+  // const date_p = date.split('T')[0].split('-');
+  // const day = date_p[2];
+  // const month = date_p[1];
+  // const year = date_p[0];
+  // return `${day}/${month}/${year}`;
+}
 
 const useMessageStyles = makeStyles((theme) => ({
   root: {
@@ -247,7 +276,8 @@ const Message = ({
       {!date ? null : (
         <div className={classes.dateContainer}>
           <div className={classes.dateBox}>
-            <Moment format="hh:mm">{moment(date, "hh:mm a")}</Moment>
+            {date.toString()}
+            {/* <Moment format="hh:mm">{moment(date, "hh:mm a")}</Moment> */}
           </div>
         </div>
       )}
@@ -450,10 +480,20 @@ const ChatUI = ({
               className={styles.messages}
               style={{ paddingBottom: "50px", paddingTop: "50px" }}
             >
-              {messages.map((data, index) => (
+              {messages.map((data, index) => {
+                 const today = getDateStr(data.createdAt);
+                 const yday = index > 0 && getDateStr(messages[index-1].createdAt);
+                 console.log("Today Raw", data.createdAt)
+                 console.log("Yday Raw", index > 0 && messages[index-1].createdAt)
+                 console.log("Today", today)
+                 console.log("YDay", yday)
+                 console.log("Eq", today == yday)
+                 console.log("Eq Eq", today === yday)
+                return (
                 <Message
                   key={index}
-                  time={ new Date(data.createdAt) }
+                  // time={ new Date(data.createdAt) }
+                  date={(index > 0 && (today === yday)) ? null : today }
                   left={!data.sentBy === uid}
                   right={data.sentBy === uid}
                   name={data.name}
@@ -462,13 +502,13 @@ const ChatUI = ({
                   color={data.sentBy === uid ? "primary" : null}
                   textColor={"black"}
                 >
-                  {data.text ? (
+                  {!data.file ? (
                     data.text
                   ) : (
-                    <FileDisplay file={data.file} textColor={"black"} />
+                    <FileDisplay name={data.text} file={data.file} textColor={"black"} />
                   )}
                 </Message>
-              ))}
+                 )})}
             </div>
           </CardContent>
         </Card>
@@ -566,14 +606,10 @@ const ChatUI = ({
 // const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
-
-const HOME_ROUTE = "https://notification.opdlift.com";
-// const HOME_ROUTE = "http://localhost:5001";
-
-const API_ENDPOINT = HOME_ROUTE + "/api/chat";
-
-const SOCKET_ENDPOINT = HOME_ROUTE;
-
+const SOCKET_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com";
+const API_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com/api/chat";
+// const SOCKET_ENDPOINT = "https://notification.opdlift.com";
+// const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
 
 // initialize the socket instance
 let socket;
@@ -607,9 +643,10 @@ export default class Chat extends React.Component {
   getDetails = async () => {
     try {
       var token = this.props.match.params.token;
-
+      // console.log({ token });
       var result = await axios.post(
-        HOME_ROUTE +  "/api/agora/meeting-details",
+        "https://tranquil-refuge-61737.herokuapp.com/api/agora/meeting-details",
+        // "http://localhost:5001/api/agora/meeting-details",
         { token }
       );
       var { smallToken, meetingDetails } = result.data;
@@ -672,14 +709,11 @@ export default class Chat extends React.Component {
   saveImageMessage = async (file) => {
     let formData = new FormData();
     formData.append("file", file);
-
-    console.log("----- PRINT THE FILE ----");
     console.log({ file });
-    console.log("----- PRINT THE FILE ----");
-
     this.setState({ isLoading: true });
 
     try {
+      // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
       var url = API_ENDPOINT + "/upload-file";
       var res = await axios.post(url, formData, {
         headers: {
@@ -717,10 +751,7 @@ export default class Chat extends React.Component {
 
       this.setState({ isLoading: false });
     } catch (err) {
-
-      console.log({err});
-
-      console.log(err, err && err.response && err.response.data && err.response.data.errors);
+      console.log(err, err.response.data.errors);
       this.setState({ isLoading: false });
     }
   };
