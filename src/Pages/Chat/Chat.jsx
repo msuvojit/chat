@@ -220,6 +220,7 @@ const ChatBubble = ({
 };
 
 const getDateStr = (date)=>{
+<<<<<<< HEAD
   const date_t = new Date(date);
   // console.log("DATE: ", date, date_t);
   return date_t.toLocaleDateString("en-US", {year: "numeric", month: "numeric", day: "numeric"});
@@ -228,6 +229,13 @@ const getDateStr = (date)=>{
   // const month = date_p[1];
   // const year = date_p[0];
   // return `${day}/${month}/${year}`;
+=======
+  const date_p = date.split('T')[0].split('-');
+  const day = date_p[2];
+  const month = date_p[1];
+  const year = date_p[0];
+  return `${day}/${month}/${year}`;
+>>>>>>> 6fe7b16b134d2d624ea3450b3810df2386bd58b1
 }
 
 const useMessageStyles = makeStyles((theme) => ({
