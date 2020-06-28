@@ -106,7 +106,7 @@ const downloadFile = ({ filePath }) => {
 };
 
 const FileDisplay = ({ file, textColor, name }) => {
-  if (typeof file !== "object") file = { name: file };
+  if (typeof file !== "object") file = {file: file, name: name||file };
   // console.log("File: ", file, " | Name: ", name);
   const classes = useFileDisplayStyles({ textColor: textColor });
   const ns = file.name ? file.name.split('/') : "";
@@ -494,12 +494,12 @@ const ChatUI = ({
                   key={index}
                   // time={ new Date(data.createdAt) }
                   date={(index > 0 && (today === yday)) ? null : today }
-                  left={!data.sentBy === uid}
-                  right={data.sentBy === uid}
+                  left={!(data.sentBy === uid) && !(data.sending) }
+                  right={data.sentBy === uid || data.sending}
                   name={data.name}
                   // time={data.timestamp}
                   avatar={data.avatar}
-                  color={data.sentBy === uid ? "primary" : null}
+                  color={data.sending ? "#ffe3e3" : data.sentBy === uid ? "primary" : null}
                   textColor={"black"}
                 >
                   {!data.file ? (
@@ -628,7 +628,6 @@ export default class Chat extends React.Component {
       meetingDetails: "",
     };
   }
-
   scrollToBottom = () => {
     document
       .getElementById("chatList")
@@ -639,13 +638,32 @@ export default class Chat extends React.Component {
     // objDiv.scrollTop = objDiv.scrollHeight;
     // objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;
   };
-
+  addMessage = (message)=>{
+    this.setState(state=>{
+      // if(message.file){
+      //   const isSending = state.messages.filter(m => (m.sending && m.file && m.file.file === message.file.file) ).length != 0;
+      //   const new_message = message.createdAt ? message : {...message, createdAt: new Date()};
+      //   if(isSending) return { messages: state.messages.map(m => (m.sending && m.file && m.file.file === message.file.file) ? new_message : m ) }
+      //   return { messages: [...state.messages, new_message]}
+      // }
+      const isSending = state.messages.filter(m => (m.sending && m.text === message.text) ).length != 0;
+      const new_message = message.createdAt ? message : {...message, createdAt: new Date()};
+      if(isSending) return { messages: state.messages.map(m => (m.sending && m.text === message.text) ? new_message : m ) }
+      return { messages: [...state.messages, new_message]}
+    },
+      // { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
+      () => {
+        console.log("Added Message");
+        this.scrollToBottom();
+      }
+    );
+  }
   getDetails = async () => {
     try {
       var token = this.props.match.params.token;
       // console.log({ token });
       var result = await axios.post(
-        "https://tranquil-refuge-61737.herokuapp.com/api/agora/meeting-details",
+        "https://cryptic-wildwood-19513.herokuapp.com/api/agora/meeting-details",
         // "http://localhost:5001/api/agora/meeting-details",
         { token }
       );
@@ -678,19 +696,21 @@ export default class Chat extends React.Component {
             },
             (error) => {
               if (error) {
-                alert(error);
+                console.error(error);
               }
             }
           );
 
           socket.on("message", (message) => {
-            this.setState(
-              { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
-              () => {
-                console.log("socket.on message");
-                this.scrollToBottom();
-              }
-            );
+            console.log("Socket Message: ", message)
+            this.addMessage(message);
+            // this.setState(
+            //   { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
+            //   () => {
+            //     console.log("socket.on message");
+            //     this.scrollToBottom();
+            //   }
+            // );
           });
 
           socket.on("roomData", ({ users }) => {
@@ -711,7 +731,10 @@ export default class Chat extends React.Component {
     formData.append("file", file);
     console.log({ file });
     this.setState({ isLoading: true });
-
+    this.addMessage({text: null, createdAt: new Date(), sending: true, file: {
+      file: "Sending",
+      text: "Filename"
+    }});
     try {
       // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
       var url = API_ENDPOINT + "/upload-file";
@@ -729,6 +752,7 @@ export default class Chat extends React.Component {
         this.state.uid,
         this.state.meetingDetails.patientName,
         res.data,
+        file.name,
         () => {
           this.setState({ message: "" });
         }
@@ -738,6 +762,7 @@ export default class Chat extends React.Component {
         sentBy: this.state.uid,
         name: this.state.name,
         file: res.data,
+        text: file.name,
       };
       var saveFile = await axios.post(API_ENDPOINT + "/save-file", data);
       console.log(saveFile.data);
@@ -772,6 +797,7 @@ export default class Chat extends React.Component {
 
     console.log({ messageText });
     if (this.state.message) {
+      this.addMessage({text: this.state.message, createdAt: new Date(), sending: true, file: null});
       socket.emit(
         "sendMessage",
         this.state.channel,
