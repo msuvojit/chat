@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/styles";
+import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/styles';
 import {
   Card,
   Paper,
@@ -11,47 +11,47 @@ import {
   InputAdornment,
   FormControl,
   Tooltip,
-} from "@material-ui/core";
-import axios from "axios";
-import MessageIcon from "@material-ui/icons/Message";
-import AttachIcon from "@material-ui/icons/AttachFile";
-import CameraIcon from "@material-ui/icons/CameraAlt";
-import CloseIcon from "@material-ui/icons/Close";
-import BackIcon from "@material-ui/icons/ArrowBack";
-import SmileIcon from "@material-ui/icons/Mood";
-import DownloadIcon from "@material-ui/icons/CloudDownload";
+} from '@material-ui/core';
+import axios from 'axios';
+import MessageIcon from '@material-ui/icons/Message';
+import AttachIcon from '@material-ui/icons/AttachFile';
+import CameraIcon from '@material-ui/icons/CameraAlt';
+import CloseIcon from '@material-ui/icons/Close';
+import BackIcon from '@material-ui/icons/ArrowBack';
+import SmileIcon from '@material-ui/icons/Mood';
+import DownloadIcon from '@material-ui/icons/CloudDownload';
 
-import green from "@material-ui/core/colors/green";
-import sec from "@material-ui/core/colors/blueGrey";
+import green from '@material-ui/core/colors/green';
+import sec from '@material-ui/core/colors/blueGrey';
 // import firebase from "firebase";
-import Moment from "react-moment";
-import moment from "moment";
-import EmojiPicker from "emoji-picker-react";
-import io from "socket.io-client";
+import Moment from 'react-moment';
+import moment from 'moment';
+import EmojiPicker from 'emoji-picker-react';
+import io from 'socket.io-client';
 
-import RestoreIcon from "@material-ui/icons/Restore";
+import RestoreIcon from '@material-ui/icons/Restore';
 
 const useAvatarStyles = makeStyles((theme) => ({
   root: {
-    width: (props) => (props.size ? props.size : "50px"),
-    height: (props) => (props.size ? props.size : "50px"),
-    margin: `calc(1/5 * ${(props) => (props.size ? props.size : "50px")})`,
-    backgroundColor: "#ddd",
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "center",
-    backgroundSize: "cover",
-    borderRadius: "50%",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: `calc(4/5 * ${(props) => (props.size ? props.size : "50px")})`,
+    width: (props) => (props.size ? props.size : '50px'),
+    height: (props) => (props.size ? props.size : '50px'),
+    margin: `calc(1/5 * ${(props) => (props.size ? props.size : '50px')})`,
+    backgroundColor: '#ddd',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    backgroundSize: 'cover',
+    borderRadius: '50%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: `calc(4/5 * ${(props) => (props.size ? props.size : '50px')})`,
   },
 }));
 
 const Avatar = ({ avatar, size }) => {
   const classes = useAvatarStyles({ size: size });
-  if (avatar.type === "text")
+  if (avatar.type === 'text')
     return (
       <div
         className={classes.root}
@@ -70,34 +70,34 @@ const Avatar = ({ avatar, size }) => {
 
 const useFileDisplayStyles = makeStyles((theme) => ({
   root: {
-    border: "1px black solid",
-    maxWidth: "100%",
+    border: '1px black solid',
+    maxWidth: '100%',
     borderColor: (props) =>
-      props && props.textColor ? props.textColor : "black",
-    borderRadius: "5px",
-    padding: "10px",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
+      props && props.textColor ? props.textColor : 'black',
+    borderRadius: '5px',
+    padding: '10px',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   icon: {
     color: (props) =>
-      props && props.textColor && props.textColor !== "black"
+      props && props.textColor && props.textColor !== 'black'
         ? props.textColor
-        : "#555",
+        : '#555',
   },
   name: {
     color: (props) =>
-      props && props.textColor && props.textColor !== "black"
+      props && props.textColor && props.textColor !== 'black'
         ? props.textColor
-        : "#555",
-    marginRight: "0",
-    height: "22px",
+        : '#555',
+    marginRight: '0',
+    height: '22px',
     // maxWidth: "80%",
-    overflow: "hidden",
-    wordBreak: "break-all",
-    textOverflow: "ellipses",
+    overflow: 'hidden',
+    wordBreak: 'break-all',
+    textOverflow: 'ellipses',
   },
 }));
 
@@ -106,14 +106,27 @@ const downloadFile = ({ filePath }) => {
 };
 
 const FileDisplay = ({ file, textColor, name }) => {
-  if (typeof file !== "object") file = {file: file, name: name||file };
+  if (typeof file !== 'object') file = { file: file, name: name || file };
   // console.log("File: ", file, " | Name: ", name);
   const classes = useFileDisplayStyles({ textColor: textColor });
-  const ns = file.name ? file.name.split('/') : "";
-  let file_name = name ? name : ns.length > 0 ? ns[ns.length - 1]:"Unknown File";
-  file_name = file_name.length>33?(file_name.substring(0,30)+"..."):file_name;
+  const ns = file.name ? file.name.split('/') : '';
+  let file_name = name
+    ? name
+    : ns.length > 0
+    ? ns[ns.length - 1]
+    : 'Unknown File';
+  file_name =
+    file_name.length > 33 ? file_name.substring(0, 30) + '...' : file_name;
   return (
-    <Button variant="outlined" className={classes.root} component="a" href={file.file || ""} download target="_blank" rel="noopener noreferrer">
+    <Button
+      variant="outlined"
+      className={classes.root}
+      component="a"
+      href={file.file || ''}
+      download
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <div className={classes.name}>{file_name}</div>
       <DownloadIcon className={classes.icon} />
     </Button>
@@ -144,47 +157,46 @@ function formatAMPM(date) {
   var ampm = hours >= 12 ? 'pm' : 'am';
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
-  minutes = minutes < 10 ? '0'+minutes : minutes;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
   var strTime = hours + ':' + minutes + ' ' + ampm;
   return strTime;
 }
-
 
 const useChatBubbleStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: (props) =>
       !(props && props.color)
-        ? "white"
-        : props.color === "primary" || props.color === "secondary"
+        ? 'white'
+        : props.color === 'primary' || props.color === 'secondary'
         ? theme.palette[props.color][100]
         : props.color,
-    color: (props) => (props && props.textColor ? props.textColor : "black"),
-    maxWidth: "70%",
-    padding: "15px",
-    borderRadius: "15px",
+    color: (props) => (props && props.textColor ? props.textColor : 'black'),
+    maxWidth: '70%',
+    padding: '15px',
+    borderRadius: '15px',
     borderBottomLeftRadius: (props) => (props && props.left ? 0 : null),
     borderBottomRightRadius: (props) => (props && !props.left ? 0 : null),
-    float: (props) => (props && props.left ? null : "right"),
-    "overflow-wrap": "break-word",
-    width: "fit-content",
+    float: (props) => (props && props.left ? null : 'right'),
+    'overflow-wrap': 'break-word',
+    width: 'fit-content',
   },
   info: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    marginTop: "7px",
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    marginTop: '7px',
   },
   title: {
     fontWeight: 500,
-    marginRight: "50px",
-    fontSize: "17px",
-    color: (props) => (props && props.textColor ? props.textColor : "black"),
+    marginRight: '50px',
+    fontSize: '17px',
+    color: (props) => (props && props.textColor ? props.textColor : 'black'),
   },
   sub: {
     fontWeight: 300,
-    fontSize: "14px",
-    color: (props) => (props && props.textColor ? props.textColor : "black"),
+    fontSize: '14px',
+    color: (props) => (props && props.textColor ? props.textColor : 'black'),
   },
 }));
 
@@ -202,59 +214,62 @@ const ChatBubble = ({
     color: color,
     left: isLeft,
     textColor: textColor,
-    "overflow-wrap": "break-word",
+    'overflow-wrap': 'break-word',
   });
 
   return (
     <div className={classes.root}>
       {children}
-      {
-        !time ? null :
-      <div className={classes.info}>
-        {/* <div className={classes.title}>{name}</div> */}
-        <div className={classes.sub}>{formatAMPM(time)}</div>
-      </div>
-      }
+      {!time ? null : (
+        <div className={classes.info}>
+          {/* <div className={classes.title}>{name}</div> */}
+          <div className={classes.sub}>{formatAMPM(time)}</div>
+        </div>
+      )}
     </div>
   );
 };
 
-const getDateStr = (date)=>{
+const getDateStr = (date) => {
   const date_t = new Date(date);
   // console.log("DATE: ", date, date_t);
-  return date_t.toLocaleDateString("en-US", {year: "numeric", month: "numeric", day: "numeric"});
+  return date_t.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  });
   // const date_p = date.split('T')[0].split('-');
   // const day = date_p[2];
   // const month = date_p[1];
   // const year = date_p[0];
   // return `${day}/${month}/${year}`;
-}
+};
 
 const useMessageStyles = makeStyles((theme) => ({
   root: {
-    display: "flex",
-    flexDirection: (props) => (props && props.left ? "row" : "row-reverse"),
-    justifyContent: "flex-start",
-    alignItems: "center",
-    margin: "10px",
-    position: "relative",
+    display: 'flex',
+    flexDirection: (props) => (props && props.left ? 'row' : 'row-reverse'),
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    margin: '10px',
+    position: 'relative',
   },
   dateContainer: {
-    width: "100%",
-    position: "relative",
-    marginBottom: "60px",
+    width: '100%',
+    position: 'relative',
+    marginBottom: '60px',
   },
   dateBox: {
-    position: "absolute",
-    left: "50%",
-    transform: "translateX(-50%)",
-    padding: "12px",
-    backgroundColor: "#eee",
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    padding: '12px',
+    backgroundColor: '#eee',
     fontWeight: 300,
-    borderRadius: "10px",
+    borderRadius: '10px',
   },
   msgWrap: {
-    width: "100%",
+    width: '100%',
   },
 }));
 
@@ -303,113 +318,113 @@ const Message = ({
 const avatar_dr = (
   <Avatar
     size="32px"
-    avatar={{ type: "text", text: "M", color: "purple", textColor: "white" }}
+    avatar={{ type: 'text', text: 'M', color: 'purple', textColor: 'white' }}
   />
 );
 const avatar_andy = (
   <Avatar
     size="32px"
-    avatar={{ type: "text", text: "A", color: "#ddd", textColor: "black" }}
+    avatar={{ type: 'text', text: 'A', color: '#ddd', textColor: 'black' }}
   />
 );
 
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.primary[50],
-    height: "100vh",
-    width: "100vw",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "stretch",
+    height: '100vh',
+    width: '100vw',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
-  "@media screen and (min-width: 738px)": {
+  '@media screen and (min-width: 738px)': {
     root: {
-      alignItems: "center",
+      alignItems: 'center',
     },
   },
   outerCard: {
     paddingLeft: 0,
     paddingRight: 0,
-    minHeight: "80vh",
-    minWidth: "50vw",
-    maxHeight: "100vh",
-    backgroundColor: "#eee",
-    display: "flex",
-    flexDirection: "column",
-    width: "100vw",
+    minHeight: '80vh',
+    minWidth: '50vw',
+    maxHeight: '100vh',
+    backgroundColor: '#eee',
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100vw',
   },
   cardActions: {
-    flexShrink: "1",
-    display: "flex",
-    width: "100%",
-    backgroundColor: "#eee",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexShrink: '1',
+    display: 'flex',
+    width: '100%',
+    backgroundColor: '#eee',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sendButton: {
-    color: "white",
-    paddingTop: "auto",
-    paddingBottom: "auto",
-    margin: "10px",
+    color: 'white',
+    paddingTop: 'auto',
+    paddingBottom: 'auto',
+    margin: '10px',
     marginLeft: 0,
   },
   altButton: {
-    paddingTop: "auto",
-    paddingBottom: "auto",
-    paddingLeft: "5px",
-    paddingRight: "5px",
-    margin: "10px",
+    paddingTop: 'auto',
+    paddingBottom: 'auto',
+    paddingLeft: '5px',
+    paddingRight: '5px',
+    margin: '10px',
     marginLeft: 0,
-    minWidth: "0",
+    minWidth: '0',
   },
   sendMessage: {
-    "& .MuiFilledInput-input": {
-      paddingTop: "10px",
+    '& .MuiFilledInput-input': {
+      paddingTop: '10px',
     },
-    margin: "10px",
+    margin: '10px',
   },
   messageCard: {
-    backgroundColor: "#FCEBDC",
-    overflowY: "auto",
-    flexGrow: "1",
-    minHeight: "75%",
+    backgroundColor: '#FCEBDC',
+    overflowY: 'auto',
+    flexGrow: '1',
+    minHeight: '75%',
     // maxHeight: "90vh",
   },
   title: {
-    fontSize: "16px",
-    marginLeft: "5px",
+    fontSize: '16px',
+    marginLeft: '5px',
   },
   header: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    color: "#777",
-    padding: "10px",
-    backgroundColor: "#eee",
-    position: "fixed",
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    color: '#777',
+    padding: '10px',
+    backgroundColor: '#eee',
+    position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
-    "z-index": 99999
+    'z-index': 99999,
   },
   grow: {
-    flexGrow: "1",
+    flexGrow: '1',
   },
   restart: {
-    marginRight: "20px",
+    marginRight: '20px',
   },
   emojiContainer: {
-    position: "relative",
-    "& .emoji-picker-react": {
-      position: "absolute",
+    position: 'relative',
+    '& .emoji-picker-react': {
+      position: 'absolute',
       bottom: 0,
       right: 0,
     },
   },
 })); // Defines Styles with MaterialUI Styling
-var LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif?a";
+var LOADING_IMAGE_URL = 'https://www.google.com/images/spin-32.gif?a';
 
 const ChatUI = ({
   uid,
@@ -424,7 +439,7 @@ const ChatUI = ({
 }) => {
   const styles = useStyles();
 
-  let chatName = "";
+  let chatName = '';
 
   if (smallToken === meetingDetails.dSmallToken) {
     chatName = meetingDetails.patientName;
@@ -435,9 +450,9 @@ const ChatUI = ({
   let firstCharChatName =
     chatName.charAt(0) && chatName.charAt(0).toUpperCase();
 
-  console.log("-----------------");
+  console.log('-----------------');
   console.log({ firstCharChatName });
-  console.log("-----------------");
+  console.log('-----------------');
 
   return (
     <div className={styles.root}>
@@ -451,10 +466,10 @@ const ChatUI = ({
           <Avatar
             size="32px"
             avatar={{
-              type: "text",
+              type: 'text',
               text: firstCharChatName,
-              color: "#ddd",
-              textColor: "black",
+              color: '#ddd',
+              textColor: 'black',
             }}
           />
           <div className={styles.title}>{chatName}</div>
@@ -478,37 +493,52 @@ const ChatUI = ({
             <div
               id="chatList"
               className={styles.messages}
-              style={{ paddingBottom: "50px", paddingTop: "50px" }}
+              style={{ paddingBottom: '50px', paddingTop: '50px' }}
             >
               {messages.map((data, index) => {
-                 const today = getDateStr(data.createdAt);
-                 const yday = index > 0 && getDateStr(messages[index-1].createdAt);
-                 console.log("Today Raw", data.createdAt)
-                 console.log("Yday Raw", index > 0 && messages[index-1].createdAt)
-                 console.log("Today", today)
-                 console.log("YDay", yday)
-                 console.log("Eq", today == yday)
-                 console.log("Eq Eq", today === yday)
+                const today = getDateStr(data.createdAt);
+                const yday =
+                  index > 0 && getDateStr(messages[index - 1].createdAt);
+                console.log('Today Raw', data.createdAt);
+                console.log(
+                  'Yday Raw',
+                  index > 0 && messages[index - 1].createdAt
+                );
+                console.log('Today', today);
+                console.log('YDay', yday);
+                console.log('Eq', today == yday);
+                console.log('Eq Eq', today === yday);
                 return (
-                <Message
-                  key={index}
-                  // time={ new Date(data.createdAt) }
-                  date={(index > 0 && (today === yday)) ? null : today }
-                  left={!(data.sentBy === uid) && !(data.sending) }
-                  right={data.sentBy === uid || data.sending}
-                  name={data.name}
-                  // time={data.timestamp}
-                  avatar={data.avatar}
-                  color={data.sending ? "#ffe3e3" : data.sentBy === uid ? "primary" : null}
-                  textColor={"black"}
-                >
-                  {!data.file ? (
-                    data.text
-                  ) : (
-                    <FileDisplay name={data.text} file={data.file} textColor={"black"} />
-                  )}
-                </Message>
-                 )})}
+                  <Message
+                    key={index}
+                    // time={ new Date(data.createdAt) }
+                    date={index > 0 && today === yday ? null : today}
+                    left={!(data.sentBy === uid) && !data.sending}
+                    right={data.sentBy === uid || data.sending}
+                    name={data.name}
+                    // time={data.timestamp}
+                    avatar={data.avatar}
+                    color={
+                      data.sending
+                        ? '#ffe3e3'
+                        : data.sentBy === uid
+                        ? 'primary'
+                        : null
+                    }
+                    textColor={'black'}
+                  >
+                    {!data.file ? (
+                      data.text
+                    ) : (
+                      <FileDisplay
+                        name={data.text}
+                        file={data.file}
+                        textColor={'black'}
+                      />
+                    )}
+                  </Message>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -522,7 +552,7 @@ const ChatUI = ({
           ) : null} */}
         <div
           className={styles.cardActions}
-          style={{ position: "fixed", bottom: 0 }}
+          style={{ position: 'fixed', bottom: 0 }}
           // onSubmit={(e) => {
           //   e.preventDefault();
           //   loadMessages();
@@ -539,7 +569,7 @@ const ChatUI = ({
               value={message}
               onKeyDown={(e) => {
                 console.log(e.key);
-                if (e.key === "Enter") {
+                if (e.key === 'Enter') {
                   if (message.length === 0) return;
                   saveMessage(message);
                 }
@@ -565,7 +595,7 @@ const ChatUI = ({
               className={styles.altButton}
               color="primary"
               variant="outlined"
-              onClick={() => document.getElementById("file-upload").click()}
+              onClick={() => document.getElementById('file-upload').click()}
             >
               <AttachIcon />
             </Button>
@@ -574,7 +604,7 @@ const ChatUI = ({
             id="file-upload"
             type="file"
             multiple={false}
-            style={{ display: "none" }}
+            style={{ display: 'none' }}
             onChange={(e) => saveImageMessage(e.target.files[0])}
           />
           {/* <Button className={styles.altButton} color="primary" variant="outlined">
@@ -606,10 +636,10 @@ const ChatUI = ({
 // const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
-const SOCKET_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com";
-const API_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com/api/chat";
-// const SOCKET_ENDPOINT = "https://notification.opdlift.com";
-// const API_ENDPOINT = "https://notification.opdlift.com/api/chat";
+// const SOCKET_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com";
+// const API_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com/api/chat";
+const SOCKET_ENDPOINT = 'https://notification.opdlift.com';
+const API_ENDPOINT = 'https://notification.opdlift.com/api/chat';
 
 // initialize the socket instance
 let socket;
@@ -618,52 +648,62 @@ export default class Chat extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      message: "",
+      message: '',
       messages: [],
       showEmoji: false,
-      uid: "",
-      channel: "",
-      token: "",
-      smallToken: "",
-      meetingDetails: "",
+      uid: '',
+      channel: '',
+      token: '',
+      smallToken: '',
+      meetingDetails: '',
     };
   }
   scrollToBottom = () => {
     document
-      .getElementById("chatList")
-      .scrollIntoView({ behavior: "smooth", block: "end" });
+      .getElementById('chatList')
+      .scrollIntoView({ behavior: 'smooth', block: 'end' });
     // var objDiv = document.getElementsByClassName("MuiCardContent-root");
     // var objDiv = document.getElementById("chatList");
     // console.log({ objDiv });
     // objDiv.scrollTop = objDiv.scrollHeight;
     // objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;
   };
-  addMessage = (message)=>{
-    this.setState(state=>{
-      // if(message.file){
-      //   const isSending = state.messages.filter(m => (m.sending && m.file && m.file.file === message.file.file) ).length != 0;
-      //   const new_message = message.createdAt ? message : {...message, createdAt: new Date()};
-      //   if(isSending) return { messages: state.messages.map(m => (m.sending && m.file && m.file.file === message.file.file) ? new_message : m ) }
-      //   return { messages: [...state.messages, new_message]}
-      // }
-      const isSending = state.messages.filter(m => (m.sending && m.text === message.text) ).length != 0;
-      const new_message = message.createdAt ? message : {...message, createdAt: new Date()};
-      if(isSending) return { messages: state.messages.map(m => (m.sending && m.text === message.text) ? new_message : m ) }
-      return { messages: [...state.messages, new_message]}
-    },
+  addMessage = (message) => {
+    this.setState(
+      (state) => {
+        // if(message.file){
+        //   const isSending = state.messages.filter(m => (m.sending && m.file && m.file.file === message.file.file) ).length != 0;
+        //   const new_message = message.createdAt ? message : {...message, createdAt: new Date()};
+        //   if(isSending) return { messages: state.messages.map(m => (m.sending && m.file && m.file.file === message.file.file) ? new_message : m ) }
+        //   return { messages: [...state.messages, new_message]}
+        // }
+        const isSending =
+          state.messages.filter((m) => m.sending && m.text === message.text)
+            .length != 0;
+        const new_message = message.createdAt
+          ? message
+          : { ...message, createdAt: new Date() };
+        if (isSending)
+          return {
+            messages: state.messages.map((m) =>
+              m.sending && m.text === message.text ? new_message : m
+            ),
+          };
+        return { messages: [...state.messages, new_message] };
+      },
       // { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
       () => {
-        console.log("Added Message");
+        console.log('Added Message');
         this.scrollToBottom();
       }
     );
-  }
+  };
   getDetails = async () => {
     try {
       var token = this.props.match.params.token;
       // console.log({ token });
       var result = await axios.post(
-        "https://cryptic-wildwood-19513.herokuapp.com/api/agora/meeting-details",
+        'https://notification.opdlift.com/api/agora/meeting-details',
         // "http://localhost:5001/api/agora/meeting-details",
         { token }
       );
@@ -688,7 +728,7 @@ export default class Chat extends React.Component {
         () => {
           socket = io(SOCKET_ENDPOINT);
           socket.emit(
-            "join",
+            'join',
             {
               sentBy: this.state.uid,
               name: this.state.name,
@@ -701,8 +741,8 @@ export default class Chat extends React.Component {
             }
           );
 
-          socket.on("message", (message) => {
-            console.log("Socket Message: ", message)
+          socket.on('message', (message) => {
+            console.log('Socket Message: ', message);
             this.addMessage(message);
             // this.setState(
             //   { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
@@ -713,7 +753,7 @@ export default class Chat extends React.Component {
             // );
           });
 
-          socket.on("roomData", ({ users }) => {
+          socket.on('roomData', ({ users }) => {
             this.setState({ users });
           });
 
@@ -722,39 +762,44 @@ export default class Chat extends React.Component {
       );
       console.log(result.data);
     } catch (err) {
-      console.log("err", err.response);
+      console.log('err', err.response);
     }
   };
 
   saveImageMessage = async (file) => {
     let formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
     console.log({ file });
     this.setState({ isLoading: true });
-    this.addMessage({text: null, createdAt: new Date(), sending: true, file: {
-      file: "Sending",
-      text: "Filename"
-    }});
+    this.addMessage({
+      text: null,
+      createdAt: new Date(),
+      sending: true,
+      file: {
+        file: 'Sending',
+        text: 'Filename',
+      },
+    });
     try {
       // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
-      var url = API_ENDPOINT + "/upload-file";
+      var url = API_ENDPOINT + '/upload-file';
       var res = await axios.post(url, formData, {
         headers: {
-          "content-type": "multipart/form-data",
+          'content-type': 'multipart/form-data',
         },
       });
 
       console.log(res.data);
 
       socket.emit(
-        "sendFile",
+        'sendFile',
         this.state.channel,
         this.state.uid,
         this.state.meetingDetails.patientName,
         res.data,
         file.name,
         () => {
-          this.setState({ message: "" });
+          this.setState({ message: '' });
         }
       );
       var data = {
@@ -764,7 +809,7 @@ export default class Chat extends React.Component {
         file: res.data,
         text: file.name,
       };
-      var saveFile = await axios.post(API_ENDPOINT + "/save-file", data);
+      var saveFile = await axios.post(API_ENDPOINT + '/save-file', data);
       console.log(saveFile.data);
 
       // var updateFile = await axios.put(ENDPOINT + "/update-file", {
@@ -791,21 +836,26 @@ export default class Chat extends React.Component {
   };
 
   saveMessage = (messageText) => {
-    this.setState({ message: "" });
+    this.setState({ message: '' });
 
-    console.log("saveMessage");
+    console.log('saveMessage');
 
     console.log({ messageText });
     if (this.state.message) {
-      this.addMessage({text: this.state.message, createdAt: new Date(), sending: true, file: null});
+      this.addMessage({
+        text: this.state.message,
+        createdAt: new Date(),
+        sending: true,
+        file: null,
+      });
       socket.emit(
-        "sendMessage",
+        'sendMessage',
         this.state.channel,
         this.state.uid,
         this.state.meetingDetails.patientName,
         this.state.message,
         () => {
-          this.setState({ message: "" });
+          this.setState({ message: '' });
           this.scrollToBottom();
         }
       );
