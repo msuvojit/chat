@@ -107,14 +107,14 @@ const downloadFile = ({ filePath }) => {
 
 const FileDisplay = ({ file, textColor, name }) => {
   if (typeof file !== 'object') file = { file: file, name: name || file };
-  // console.log("File: ", file, " | Name: ", name);
+
   const classes = useFileDisplayStyles({ textColor: textColor });
   const ns = file.name ? file.name.split('/') : '';
   let file_name = name
     ? name
     : ns.length > 0
     ? ns[ns.length - 1]
-    : 'Unknown File';
+    : 'Uploading...';
   file_name =
     file_name.length > 33 ? file_name.substring(0, 30) + '...' : file_name;
   return (
@@ -638,6 +638,7 @@ const ChatUI = ({
 // production url
 // const SOCKET_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com";
 // const API_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com/api/chat";
+
 const SOCKET_ENDPOINT = 'https://notification.opdlift.com';
 const API_ENDPOINT = 'https://notification.opdlift.com/api/chat';
 
