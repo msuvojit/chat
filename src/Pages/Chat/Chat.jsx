@@ -632,15 +632,15 @@ const ChatUI = ({
 // const SOCKET_ENDPOINT = "http://localhost:5001";
 // const API_ENDPOINT = "http://localhost:5001/api/chat";
 
-// const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
-// const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
+const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
+const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
 
 // production url
 // const SOCKET_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com";
 // const API_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com/api/chat";
 
-const SOCKET_ENDPOINT = 'https://notification.opdlift.com';
-const API_ENDPOINT = 'https://notification.opdlift.com/api/chat';
+// const SOCKET_ENDPOINT = 'https://notification.opdlift.com';
+// const API_ENDPOINT = 'https://notification.opdlift.com/api/chat';
 
 // initialize the socket instance
 let socket;
@@ -822,7 +822,10 @@ export default class Chat extends React.Component {
 
       this.setState({ isLoading: false });
     } catch (err) {
-      console.log(err, err.response.data.errors);
+      // console.log(err, err.response.data.errors);
+
+      console.log(err);
+
       this.setState({ isLoading: false });
     }
   };
