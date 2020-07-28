@@ -450,9 +450,9 @@ const ChatUI = ({
   let firstCharChatName =
     chatName.charAt(0) && chatName.charAt(0).toUpperCase();
 
-  console.log('-----------------');
-  console.log({ firstCharChatName });
-  console.log('-----------------');
+  // console.log('-----------------');
+  // console.log({ firstCharChatName });
+  // console.log('-----------------');
 
   return (
     <div className={styles.root}>
@@ -499,15 +499,15 @@ const ChatUI = ({
                 const today = getDateStr(data.createdAt);
                 const yday =
                   index > 0 && getDateStr(messages[index - 1].createdAt);
-                console.log('Today Raw', data.createdAt);
-                console.log(
-                  'Yday Raw',
-                  index > 0 && messages[index - 1].createdAt
-                );
-                console.log('Today', today);
-                console.log('YDay', yday);
-                console.log('Eq', today == yday);
-                console.log('Eq Eq', today === yday);
+                // console.log('Today Raw', data.createdAt);
+                // console.log(
+                //   'Yday Raw',
+                //   index > 0 && messages[index - 1].createdAt
+                // );
+                // console.log('Today', today);
+                // console.log('YDay', yday);
+                // console.log('Eq', today == yday);
+                // console.log('Eq Eq', today === yday);
                 return (
                   <Message
                     key={index}
@@ -629,18 +629,11 @@ const ChatUI = ({
 };
 
 // dev url
-// const SOCKET_ENDPOINT = "http://localhost:5001";
-// const API_ENDPOINT = "http://localhost:5001/api/chat";
+// const SOCKET_ENDPOINT = 'http://localhost:5001';
+// const API_ENDPOINT = 'http://localhost:5001/api/chat';
 
-const SOCKET_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com";
-const API_ENDPOINT = "https://tranquil-refuge-61737.herokuapp.com/api/chat";
-
-// production url
-// const SOCKET_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com";
-// const API_ENDPOINT = "https://cryptic-wildwood-19513.herokuapp.com/api/chat";
-
-// const SOCKET_ENDPOINT = 'https://notification.opdlift.com';
-// const API_ENDPOINT = 'https://notification.opdlift.com/api/chat';
+const SOCKET_ENDPOINT = 'https://notification.opdlift.com';
+const API_ENDPOINT = 'https://notification.opdlift.com/api/chat';
 
 // initialize the socket instance
 let socket;
@@ -694,7 +687,7 @@ export default class Chat extends React.Component {
       },
       // { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
       () => {
-        console.log('Added Message');
+        // console.log('Added Message');
         this.scrollToBottom();
       }
     );
@@ -705,7 +698,7 @@ export default class Chat extends React.Component {
       // console.log({ token });
       var result = await axios.post(
         'https://notification.opdlift.com/api/agora/meeting-details',
-        // "http://localhost:5001/api/agora/meeting-details",
+        // 'http://localhost:5001/api/agora/meeting-details',
         { token }
       );
       var { smallToken, meetingDetails } = result.data;
@@ -743,7 +736,7 @@ export default class Chat extends React.Component {
           );
 
           socket.on('message', (message) => {
-            console.log('Socket Message: ', message);
+            // console.log('Socket Message: ', message);
             this.addMessage(message);
             // this.setState(
             //   { messages: [...this.state.messages, message.createdAt ? message : {...message, createdAt: new Date()}] },
@@ -761,17 +754,59 @@ export default class Chat extends React.Component {
           this.getMessages();
         }
       );
-      console.log(result.data);
+      // console.log(result.data);
     } catch (err) {
       console.log('err', err.response);
+    }
+  };
+
+  uploadFile = async (file) => {
+    try {
+      var fileType = file.type;
+      const fileName = `${file.name}`;
+      var data = {
+        fileName,
+        fileType,
+      };
+
+      var config = {
+        method: 'post',
+        url: 'https://notification.opdlift.com/api/chat/sign-s3',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: data,
+      };
+
+      var result = await axios(config);
+      const { signedRequest, url } = result.data;
+      console.log(signedRequest);
+
+      var putConfig = {
+        method: 'put',
+        url: signedRequest,
+        headers: {
+          'Content-Type': fileType,
+        },
+        data: file,
+      };
+
+      result = await axios(putConfig);
+      console.log(url);
+      return url;
+    } catch (err) {
+      console.log(err.response);
     }
   };
 
   saveImageMessage = async (file) => {
     let formData = new FormData();
     formData.append('file', file);
+
     console.log({ file });
+
     this.setState({ isLoading: true });
+
     this.addMessage({
       text: null,
       createdAt: new Date(),
@@ -781,43 +816,48 @@ export default class Chat extends React.Component {
         text: 'Filename',
       },
     });
-    try {
-      // var url = "https://tranquil-refuge-61737.herokuapp.com/api/chat/upload-file";
-      var url = API_ENDPOINT + '/upload-file';
-      var res = await axios.post(url, formData, {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      });
 
-      console.log(res.data);
+    try {
+      var url = API_ENDPOINT + '/upload-file';
+
+      // var res = await axios.post(url, formData, {
+      //   headers: {
+      //     'content-type': 'multipart/form-data',
+      //   },
+      // });
+
+      var res = await this.uploadFile(file);
+
+      console.log({ res });
+
+      // console.log(res.data);
 
       socket.emit(
         'sendFile',
         this.state.channel,
         this.state.uid,
         this.state.meetingDetails.patientName,
-        res.data,
+
+        res,
+
         file.name,
         () => {
           this.setState({ message: '' });
         }
       );
+
       var data = {
         room: this.state.channel,
         sentBy: this.state.uid,
         name: this.state.name,
-        file: res.data,
+        file: res,
         text: file.name,
       };
+
       var saveFile = await axios.post(API_ENDPOINT + '/save-file', data);
+
       console.log(saveFile.data);
 
-      // var updateFile = await axios.put(ENDPOINT + "/update-file", {
-      //   id: saveFile.data.id,
-      //   file: res.data,
-      // });
-      // console.log(updateFile.data);
       this.getMessages();
 
       this.setState({ isLoading: false });
@@ -842,9 +882,10 @@ export default class Chat extends React.Component {
   saveMessage = (messageText) => {
     this.setState({ message: '' });
 
-    console.log('saveMessage');
+    // console.log('saveMessage');
 
-    console.log({ messageText });
+    // console.log({ messageText });
+
     if (this.state.message) {
       this.addMessage({
         text: this.state.message,
@@ -883,8 +924,9 @@ export default class Chat extends React.Component {
   }
 
   render() {
-    console.log(this.state.messages);
     // console.log(this.state.messages);
+    // console.log(this.state.messages);
+
     return (
       <ChatUI
         uid={this.state.uid}
