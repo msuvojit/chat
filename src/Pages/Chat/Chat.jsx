@@ -30,6 +30,12 @@ import EmojiPicker from 'emoji-picker-react';
 import io from 'socket.io-client';
 
 import RestoreIcon from '@material-ui/icons/Restore';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import htmlToImage from 'html-to-image';
 
 const useAvatarStyles = makeStyles((theme) => ({
   root: {
@@ -454,6 +460,94 @@ const ChatUI = ({
   // console.log({ firstCharChatName });
   // console.log('-----------------');
 
+  const [open, setOpen] = useState(false);
+  const [symp, setSymp] = useState("");
+  const [hist, setHist] = useState("");
+  const [medi, setMedi] = useState("");
+  const [test, setTest] = useState("");
+  const [followUp, setFollowUp] = useState("");
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+  
+  const handleClickOpen = () => {
+    setSymp("");
+    setHist("");
+    setMedi("");
+    setTest("");
+    setFollowUp("");
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const prevClose = () => {
+    setSymp("");
+    setHist("");
+    setMedi("");
+    setTest("");
+    setFollowUp("");
+    setPreviewOpen(false);
+  };
+
+  const preview = () => {
+    setOpen(false);
+    setPreviewOpen(true);
+  }
+
+  const sendRx= (e) => {
+    e.preventDefault();
+    console.log(symp);
+    console.log(hist);
+    console.log(medi);
+    console.log(test);
+    setSymp("");
+    setHist("");
+    setMedi("");
+    setTest("");
+    setFollowUp("");
+    setPreviewOpen(false);
+  };
+
+  const handleEdit = () => {
+    setPreviewOpen(false);
+    setOpen(true);
+  };
+
+  const base64ToFile = (dataurl, filename) => {
+ 
+    var arr = dataurl.split(','),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), 
+        n = bstr.length, 
+        u8arr = new Uint8Array(n);
+        
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new File([u8arr], filename, {type:mime});
+}
+
+// var file = dataURLtoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=','hello.txt');
+// console.log(file);
+
+  const printdoc = () =>  {
+    htmlToImage.toPng(document.getElementById('pres'))
+  .then(function (dataUrl) {
+    var link = document.createElement('a');
+    link.download = 'prescription.png';
+    link.href = dataUrl;
+    link.click();
+    // console.log(link.href);
+    const fileUpload = base64ToFile(link.href, 'prescription.png');
+    saveImageMessage(fileUpload);
+  });
+  
+  setPreviewOpen(false);
+  }
+
   return (
     <div className={styles.root}>
       <Paper className={styles.outerCard}>
@@ -575,7 +669,7 @@ const ChatUI = ({
                 }
               }}
               onChange={({ target: { value } }) => setState({ message: value })}
-              placeholder="Message"
+              placeholder="Type a message"
               // endAdornment={
               //   <InputAdornment position="end">
               //     <IconButton
@@ -590,7 +684,111 @@ const ChatUI = ({
               // }
             />
           </FormControl>
-          <Tooltip title="Click To Open">
+          <Tooltip title="Click To Open Rx">
+            <Button
+              className={styles.altButton}
+              color="primary"
+              variant="outlined"
+              onClick={handleClickOpen}
+            >
+              Rx
+            </Button>
+          </Tooltip>
+          <div>
+            <Dialog open={open} onClose={handleClose} should>
+              <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Prescription</DialogTitle>
+              <DialogContent dividers>
+                <DialogContentText>
+                  Please fill the details to make a prescription and send it directly in the chat as an attachment.
+                </DialogContentText>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="symptoms"
+                  label="Enter Symptoms"
+                  type="text"
+                  name="symptoms"
+                  fullWidth
+                  value={symp}
+                  onChange={(e) => {setSymp(e.target.value)}}
+                />
+                <TextField
+                  margin="dense"
+                  id="Medical History"
+                  label="Enter Medical History"
+                  type="text"
+                  fullWidth
+                  value={hist}
+                  onChange={(e) => {setHist(e.target.value)}}
+                />
+                <TextField
+                  margin="dense"
+                  id="medicine"
+                  label="Enter Medicines"
+                  type="text"
+                  fullWidth
+                  value={medi}
+                  onChange={(e) => {setMedi(e.target.value)}}
+                />
+                <TextField
+                  margin="dense"
+                  id="lab"
+                  label="Lab Tests (if any)"
+                  type="text"
+                  fullWidth
+                  value={test}
+                  onChange={(e) => {setTest(e.target.value)}}
+                />
+                <TextField
+                  margin="dense"
+                  id="followUp"
+                  label="Follow Up Date"
+                  type="text"
+                  fullWidth
+                  value={followUp}
+                  onChange={(e) => {setFollowUp(e.target.value)}}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={preview} color="primary">
+                  Preview 
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+
+          <div>
+            <Dialog
+              open={previewOpen}
+              onClose={handleClose}
+            ><div id="pres">
+              <DialogTitle id="alert-dialog-title">Prescription</DialogTitle>
+              <DialogContent dividers id="pres">
+                <p>SYMPTOMS: {symp}</p><hr />
+                <p>MEDICAL HISTORY: {hist}</p><hr />
+                <p>MEDICINES: {medi}</p><hr />
+                <p>LAB TESTS (if any): {test}</p><hr />
+                <p>Follow Up Date: {followUp}</p><hr />
+              </DialogContent>
+              </div>
+              <DialogActions>
+              <Button onClick={prevClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleEdit} color="primary">
+                  Edit
+                </Button>
+                <Button onClick={printdoc} color="primary" autoFocus>
+                  Send
+                </Button>
+              </DialogActions>
+            </Dialog>
+         </div>
+
+          <Tooltip title="Click To Upload">
             <Button
               className={styles.altButton}
               color="primary"
